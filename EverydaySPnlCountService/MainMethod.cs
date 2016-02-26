@@ -81,7 +81,7 @@ namespace EverydaySPnlCountService
             //建立寄件者地址與名稱
             MailAddress ReceiverAddress = new MailAddress("sm4@ewpcb.com.tw", "每日預估入庫SPnl數量統計");
             //建立收件者地址
-            MailAddress SendAddress = new MailAddress("ewa05@ewpcb.com.tw");
+            MailAddress SendAddress = new MailAddress("spnlcount@ewpcb.com.tw");
             //建立附加檔案
             Attachment attachment = new Attachment(SaveFile);
             //建立E-MAIL相關設定與訊息
