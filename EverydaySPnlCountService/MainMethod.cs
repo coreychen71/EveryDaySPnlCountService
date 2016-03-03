@@ -14,9 +14,12 @@ namespace EverydaySPnlCountService
         private Timer timer;
         //設定間隔時間為10分鐘
         private double timerInterval = 10 * 60 * 1000;
-        private string setTime = "06:30";
+        private DateTime setTime = DateTime.Parse("06:30");
+        private DateTime nowTime = DateTime.Now;
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile = Path.GetTempPath() + "SPnlCount.txt";
+        private string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + 
+            "\\EveryDaySPnlCountLog.txt";
         private StreamWriter writerResult;
         private StreamWriter writerLog;
         
@@ -30,7 +33,7 @@ namespace EverydaySPnlCountService
             //此方式為每次寫入時，均會直接覆蓋掉原本內容
             writerResult = new StreamWriter(SaveFile);
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
-            writerLog = File.AppendText("Log.txt");
+            writerLog = File.AppendText(LogPath);
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -46,15 +49,19 @@ namespace EverydaySPnlCountService
         private bool CheckTime()
         {
             bool result = false;
-            string nowTime = DateTime.Now.ToString("HH:mm");
-            if(nowTime==setTime)
+            double interval = setTime.Subtract(nowTime).TotalSeconds;
+            //差距在15分鐘內均為true
+            if (interval >= -800 && interval <= 800)
             {
                 result = true;
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   (" + nowTime + ")-Return true");
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true");
                 writerLog.Flush();
             }
-            writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   (" + nowTime + ")-Return false");
-            writerLog.Flush();
+            else
+            {
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime false");
+                writerLog.Flush();
+            }
             return result;
         }
 
