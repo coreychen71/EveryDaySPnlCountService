@@ -12,8 +12,8 @@ namespace EverydaySPnlCountService
     class MainMethod
     {
         private Timer timer;
-        //設定間隔時間為1分鐘
-        private double timerInterval = 1 * 60 * 1000;
+        //設定間隔時間為10分鐘
+        private double timerInterval = 10 * 60 * 1000;
         private string setTime = "06:30";
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile = Path.GetTempPath() + "SPnlCount.txt";
@@ -50,7 +50,11 @@ namespace EverydaySPnlCountService
             if(nowTime==setTime)
             {
                 result = true;
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   (" + nowTime + ")-Return true");
+                writerLog.Flush();
             }
+            writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   (" + nowTime + ")-Return false");
+            writerLog.Flush();
             return result;
         }
 
@@ -67,6 +71,8 @@ namespace EverydaySPnlCountService
                 }
                 writerResult.Flush();
                 writerResult.Close();
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
+                writerLog.Flush();
                 SendMail();
             }
             catch (Exception ex)
@@ -105,6 +111,8 @@ namespace EverydaySPnlCountService
             try
             {
                 MySmtp.Send(SendMail);
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Send Mail OK!");
+                writerLog.Flush();
             }
             catch(Exception ex)
             {
