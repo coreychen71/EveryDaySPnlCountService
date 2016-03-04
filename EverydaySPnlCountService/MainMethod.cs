@@ -51,15 +51,17 @@ namespace EverydaySPnlCountService
             bool result = false;
             double interval = setTime.Subtract(nowTime).TotalSeconds;
             //差距在15分鐘內均為true
-            if (interval >= -800 && interval <= 800)
+            if (interval >= -900 && interval <= 900)
             {
                 result = true;
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true");
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true_" + nowTime +
+                    "_interval=" + interval);
                 writerLog.Flush();
             }
             else
             {
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime false");
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime false_" + nowTime +
+                    "_interval=" + interval);
                 writerLog.Flush();
             }
             return result;
