@@ -15,7 +15,7 @@ namespace EverydaySPnlCountService
         //設定間隔時間為10分鐘
         private double timerInterval = 10 * 60 * 1000;
         private DateTime setTime = DateTime.Parse("06:30");
-        private DateTime nowTime = DateTime.Now;
+        private DateTime nowTime;
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile = Path.GetTempPath() + "SPnlCount.txt";
         private string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + 
@@ -49,6 +49,7 @@ namespace EverydaySPnlCountService
         private bool CheckTime()
         {
             bool result = false;
+            nowTime = DateTime.Now;
             double interval = setTime.Subtract(nowTime).TotalSeconds;
             //差距在15分鐘內均為true
             if (interval >= -900 && interval <= 900)
