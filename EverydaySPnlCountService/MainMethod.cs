@@ -30,8 +30,6 @@ namespace EverydaySPnlCountService
             timer.AutoReset = false;
             timer.Enabled = false;
             timer.Elapsed += Timer_Elapsed;
-            //此方式為每次寫入時，均會直接覆蓋掉原本內容
-            writerResult = new StreamWriter(SaveFile);
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
             writerLog = File.AppendText(LogPath);
         }
@@ -73,6 +71,8 @@ namespace EverydaySPnlCountService
         {
             try
             {
+                //此方式為每次寫入時，均會直接覆蓋掉原本內容
+                writerResult = new StreamWriter(SaveFile);
                 DataTable result = SPnlCount.SPnlCountRun();
                 writerResult.WriteLine("日期        SPnl數量" + "\r\n");
                 for (int i = 0; i < result.Rows.Count; i++)
@@ -81,6 +81,7 @@ namespace EverydaySPnlCountService
                         result.Rows[i][1].ToString() + "\r\n");
                 }
                 writerResult.Flush();
+                writerResult.Close();
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
                 writerLog.Flush();
                 SendMail();
