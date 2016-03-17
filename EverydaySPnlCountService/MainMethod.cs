@@ -50,8 +50,8 @@ namespace EverydaySPnlCountService
             setTime = DateTime.Parse("06:30");
             nowTime = DateTime.Now;
             double interval = nowTime.Subtract(setTime).TotalSeconds;
-            //差距在5分鐘內均為true
-            if (interval >= -300 && interval <= 300)
+            //差距在90秒內均為true
+            if (interval >= -90 && interval <= 90)
             {
                 result = true;
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true_" + nowTime +
