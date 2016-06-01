@@ -14,8 +14,8 @@ namespace EverydaySPnlCountService
         private Timer timer;
         private DateTime setTime;
         private DateTime nowTime;
-        //設定間隔時間為3分鐘
-        private double timerInterval = 3 * 60 * 1000;
+        //設定間隔時間為1分鐘
+        private double timerInterval = 1 * 60 * 1000;
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile = Path.GetTempPath() + "SPnlCount.txt";
         private string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + 
@@ -50,8 +50,8 @@ namespace EverydaySPnlCountService
             setTime = DateTime.Parse("06:30");
             nowTime = DateTime.Now;
             double interval = nowTime.Subtract(setTime).TotalSeconds;
-            //差距在90秒內均為true
-            if (interval >= -90 && interval <= 90)
+            //差距在60秒內均為true
+            if (interval >= -60 && interval <= 60)
             {
                 result = true;
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true_" + nowTime +
@@ -73,7 +73,7 @@ namespace EverydaySPnlCountService
             {
                 //此方式為每次寫入時，均會直接覆蓋掉原本內容
                 writerResult = new StreamWriter(SaveFile);
-                DataTable result = SPnlCount.SPnlCountRun();
+                DataTable result = SPnlCount.SPnlCountRun(nowTime);
                 writerResult.WriteLine("日期        SPnl數量" + "\r\n");
                 for (int i = 0; i < result.Rows.Count; i++)
                 {
