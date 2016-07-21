@@ -60,8 +60,9 @@ namespace EverydaySPnlCountService
             }
             else
             {
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime false_" + nowTime +
-                    "_interval=" + interval);
+                //### 初期查看時間判斷誤差值使用 ###//
+                /*writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime false_" + nowTime +
+                    "_interval=" + interval);*/
                 writerLog.Flush();
             }
             return result;
@@ -71,9 +72,12 @@ namespace EverydaySPnlCountService
         {
             try
             {
+                nowTime = DateTime.Now;
+                //### 2016/07/21 依總經理指示，再將起始日往前推1個月。 ###//
+                DateTime startDate = nowTime.AddMonths(-1);
+                DataTable result = SPnlCount.SPnlCountRun(startDate);
                 //此方式為每次寫入時，均會直接覆蓋掉原本內容
                 writerResult = new StreamWriter(SaveFile);
-                DataTable result = SPnlCount.SPnlCountRun(nowTime);
                 writerResult.WriteLine("日期        SPnl數量" + "\r\n");
                 for (int i = 0; i < result.Rows.Count; i++)
                 {
