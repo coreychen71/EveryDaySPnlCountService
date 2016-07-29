@@ -50,8 +50,8 @@ namespace EverydaySPnlCountService
             setTime = DateTime.Parse("06:30");
             nowTime = DateTime.Now;
             double interval = nowTime.Subtract(setTime).TotalSeconds;
-            //差距在60秒內均為true
-            if (interval >= -60 && interval <= 60)
+            //差距在45秒內均為true
+            if (interval >= -45 && interval <= 45)
             {
                 result = true;
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true_" + nowTime +
@@ -72,7 +72,6 @@ namespace EverydaySPnlCountService
         {
             try
             {
-                nowTime = DateTime.Now;
                 //### 2016/07/21 依總經理指示，再將起始日往前推1個月。 ###//
                 DateTime startDate = nowTime.AddMonths(-1);
                 DataTable result = SPnlCount.SPnlCountRun(startDate);
