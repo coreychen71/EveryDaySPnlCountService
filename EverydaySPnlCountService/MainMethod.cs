@@ -19,7 +19,7 @@ namespace EverydaySPnlCountService
         //設定間隔時間為1分鐘
         private double timerInterval = 1 * 60 * 1000;
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
-        private string SaveFile = Path.GetTempPath();
+        private string SaveFile="";
         private string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + 
             "\\EveryDaySPnlCountLog.txt";
         private StreamWriter writerResult;
@@ -54,23 +54,11 @@ namespace EverydaySPnlCountService
 
         private bool CheckTime(string time1,string time2)
         {
+            //##### 2016/07/30 改用判斷是否在指定的時間區段內 #####//
             bool result = false;
             nowTime = DateTime.Now;
-            //##### 2016/07/30 改用判斷是否在指定的時間區段內 #####//
             DateTime t1 = DateTime.Parse(time1);
             DateTime t2 = DateTime.Parse(time2);
-            /* ##### 原先一開始所使用的秒數差距判斷 #####
-            setTime = DateTime.Parse(settime);
-            double interval = nowTime.Subtract(setTime).TotalSeconds;
-            //差距在60秒內均為true
-            if (interval >= -60 && interval <= 60)
-            {
-                result = true;
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true_" + nowTime +
-                    "_interval=" + interval);
-                writerLog.Flush();
-            }
-            */
             if (nowTime >= t1 && nowTime <= t2)
             {
                 result = true;
@@ -83,13 +71,26 @@ namespace EverydaySPnlCountService
                 writerLog.Flush();
             }
             return result;
+            //##### 原先一開始所使用的秒數差距判斷 #####//
+            /*
+            setTime = DateTime.Parse(settime);
+            double interval = nowTime.Subtract(setTime).TotalSeconds;
+            //差距在60秒內均為true
+            if (interval >= -60 && interval <= 60)
+            {
+                result = true;
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime true_" + nowTime +
+                    "_interval=" + interval);
+                writerLog.Flush();
+            }
+            */
         }
 
         private void SPnlCountRun()
         {
             try
             {
-                SaveFile += "SPnlCount.txt";
+                SaveFile = Path.GetTempPath() + "SPnlCount.txt";
                 //### 2016/07/21 依總經理指示，再將起始日往前推1個月。 ###//
                 DateTime startDate = DateTime.Now.AddMonths(-1);
                 DataTable result = SPnlCount.SPnlCountRun(startDate);
@@ -122,7 +123,7 @@ namespace EverydaySPnlCountService
         {
             try
             {
-                SaveFile += "EquipMaintain.xls";
+                SaveFile = Path.GetTempPath() + "EquipMaintain.xls";
                 DataTable[] result = new DataTable[] { EquipMaintain.GetWaitMaintain() };
                 string[] strSheet = new string[] { "每日待修設備清單" };
                 DataTableToExcel(result, strSheet, SaveFile);
