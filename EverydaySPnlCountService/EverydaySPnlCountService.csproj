@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DFCheckHoleRecord.cs" />
     <Compile Include="MainMethod.cs" />
     <Compile Include="MainProgramInstaller.cs">
       <SubType>Component</SubType>
@@ -95,6 +96,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TXTtoTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

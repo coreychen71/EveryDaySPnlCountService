@@ -17,13 +17,13 @@ namespace EverydaySPnlCountService
         //private DateTime setTime;
         private DateTime nowTime;
         //設定間隔時間為1分鐘
-        private double timerInterval = 1 * 60 * 1000;
+        private double timerInterval = 60 * 1000;
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile="";
         private string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + 
             "\\EveryDaySPnlCountLog.txt";
         private StreamWriter writerResult;
-        private StreamWriter writerLog;
+        private static StreamWriter writerLog;
         
         public MainMethod()
         {
@@ -36,18 +36,33 @@ namespace EverydaySPnlCountService
             writerLog = File.AppendText(LogPath);
         }
 
+        /// <summary>
+        /// 寫入Log
+        /// </summary>
+        /// <param name="Msg">要寫入的訊息</param>
+        public static void InsertLog(string Msg)
+        {
+            writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + Msg + "\r\n");
+            writerLog.Flush();
+        }
+
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             timer.Stop();
             //每日06:30進行SPnl數統計
-            if (CheckTime("06:30","06:31"))
+            if (CheckTime("06:30:00", "06:30:59"))
             {
                 SPnlCountRun();
             }
             //每日16:00進行待修設備清單
-            if (CheckTime("16:00","16:01"))
+            else if (CheckTime("16:00:00", "16:00:59"))
             {
                 EquipMaintainRun();
+            }
+            //每日00:10進行鑽孔申報比對驗孔紀錄
+            else if (CheckTime("00:10:00", "00:10:59"))
+            {
+                ChkDrillHole();
             }
             timer.Start();
         }
@@ -63,13 +78,12 @@ namespace EverydaySPnlCountService
             {
                 result = true;
             }
-            else
-            {
-                //### 初期查看時間判斷誤差值使用 ###//
-                /*writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime false_" + nowTime +
-                    "_interval=" + interval);*/
-                writerLog.Flush();
-            }
+            //else
+            //{
+            //    //### 初期查看時間判斷誤差值使用 ###//
+            //    writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   CheckTime false_" + nowTime);
+            //    writerLog.Flush();
+            //}
             return result;
             //##### 原先一開始所使用的秒數差距判斷 #####//
             /*
@@ -137,6 +151,56 @@ namespace EverydaySPnlCountService
             catch (Exception ex)
             {
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
+                writerLog.Flush();
+            }
+        }
+
+
+        private void ChkDrillHole()
+        {
+            try
+            {
+                SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單.txt";
+                writerResult = new StreamWriter(SaveFile);
+                writerResult.WriteLine("批號\t料號\t數量\t驗板數量\t驗板時間(起)\t驗板時間(迄)\n\r");
+                var ewTB = DFCheckHoleRecord.GetDFRecord(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
+                TXTtoTable loadingTxt = new TXTtoTable(@"\\192.168.1.200\DailyReport5\" +
+                    DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + ".txt");
+                var chkTB = loadingTxt.GetTable();
+                foreach (DataRow row in ewTB.Rows)
+                {
+                    var chkCount = 0;
+                    var StartTime = string.Empty;
+                    var EndTime = string.Empty;
+                    foreach (DataRow chkrow in chkTB.Rows)
+                    {
+                        if (chkrow["P/N"].ToString() != "")
+                        {
+                            if (row["料號"].ToString().Trim() == chkrow["P/N"].ToString().ToUpper().Substring(0, 11))
+                            {
+                                chkCount += Convert.ToInt32(chkrow["BoardCount"]);
+                                StartTime = chkrow["StartTime"].ToString();
+                                EndTime = chkrow["EndTime"].ToString();
+                            }
+                        }
+                    }
+                    if (Convert.ToInt32(row["數量"]) > chkCount)
+                    {
+                        writerResult.WriteLine(row["批號"].ToString() + "\t" + row["料號"].ToString() + "\t" +
+                            row["數量"].ToString() + "\t" + Convert.ToString(chkCount) + "\t" + StartTime + "\t" +
+                            EndTime + "\n\r");
+                    }
+                }
+                writerResult.Flush();
+                writerResult.Close();
+                SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "checkhole@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單！",
+                    "鑽孔每日驗孔數量稽核清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            }
+            catch (Exception ex)
+            {
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\n\r");
                 writerLog.Flush();
             }
         }
@@ -213,6 +277,15 @@ namespace EverydaySPnlCountService
             return result;
         }
 
+        /// <summary>
+        /// 寄出電子郵件
+        /// </summary>
+        /// <param name="from">寄件者地址</param>
+        /// <param name="display">寄件者名稱</param>
+        /// <param name="to">收件人地址</param>
+        /// <param name="sub">郵件主旨</param>
+        /// <param name="body">郵件內容</param>
+        /// <param name="att">郵件附件，若無附件可為null</param>
         private void SendMail(string from,string display,string to,string sub,string body,string att)
         {
             //建立寄件者地址與名稱
@@ -231,7 +304,7 @@ namespace EverydaySPnlCountService
             SendMail.Priority = MailPriority.Normal;
             SendMail.Subject = sub;//主旨
             SendMail.Body = body;//內容
-            if (att != "")
+            if (att != null)
             {
                 //建立附加檔案
                 Attachment attachment = new Attachment(att);
@@ -256,7 +329,10 @@ namespace EverydaySPnlCountService
             {
                 MySmtp = null;
                 SendMail.Dispose();
-                File.Delete(SaveFile);//刪除存放在系統個人暂存區的檔案
+                if (att != null)
+                {
+                    File.Delete(SaveFile);//刪除存放在系統個人暂存區的檔案
+                }
             }
         }
 
