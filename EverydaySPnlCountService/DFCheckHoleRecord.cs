@@ -21,7 +21,7 @@ namespace EverydaySPnlCountService
                 "CONVERT(char(19), starttime, 120) as '開始時間',CONVERT(char(19), endtime, 120) as '結束時間'," +
                 "rework as '重工' from drymcse " +
                 "where departname = 'DF' and process = '鑽孔機' and workdate = '" + WorkDate + "' and " +
-                "lotnum like '[M,L,D]%' order by starttime desc";
+                "lotnum like 'M%' and todo=1 order by starttime desc";
             using (SqlConnection sqlcon = new SqlConnection(strCon))
             {
                 SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);

@@ -24,7 +24,7 @@ namespace EverydaySPnlCountService
             "\\EveryDaySPnlCountLog.txt";
         private StreamWriter writerResult;
         private static StreamWriter writerLog;
-        
+
         public MainMethod()
         {
             timer = new Timer();
@@ -63,6 +63,11 @@ namespace EverydaySPnlCountService
             else if (CheckTime("00:10:00", "00:10:59"))
             {
                 ChkDrillHole();
+            }
+            //每日00: 30進行製令單料號檢查是否有特殊油墨需求
+            else if (CheckTime("00:30:00", "00:30:59"))
+            {
+                ChkPrintingInk();
             }
             timer.Start();
         }
@@ -162,11 +167,13 @@ namespace EverydaySPnlCountService
             {
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單.txt";
                 writerResult = new StreamWriter(SaveFile);
-                writerResult.WriteLine("批號\t料號\t數量\t驗板數量\t驗板時間(起)\t驗板時間(迄)\n\r");
+                writerResult.WriteLine("批號\t料號\t數量\t驗板數量\t驗板時間(起)\t驗板時間(迄)");
                 var ewTB = DFCheckHoleRecord.GetDFRecord(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
                 TXTtoTable loadingTxt = new TXTtoTable(@"\\192.168.1.200\DailyReport5\" +
                     DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + ".txt");
                 var chkTB = loadingTxt.GetTable();
+
+                #region 開始稽核數量
                 foreach (DataRow row in ewTB.Rows)
                 {
                     var chkCount = 0;
@@ -174,23 +181,98 @@ namespace EverydaySPnlCountService
                     var EndTime = string.Empty;
                     foreach (DataRow chkrow in chkTB.Rows)
                     {
-                        if (chkrow["P/N"].ToString() != "")
+                        try
                         {
-                            if (row["料號"].ToString().Trim() == chkrow["P/N"].ToString().ToUpper().Substring(0, 11))
+                            if (chkrow["P/N"].ToString() != "")
                             {
-                                chkCount += Convert.ToInt32(chkrow["BoardCount"]);
-                                StartTime = chkrow["StartTime"].ToString();
-                                EndTime = chkrow["EndTime"].ToString();
+                                //檢查料號是否有輸入不完全的
+                                if (chkrow["P/N"].ToString().Length >= 11)
+                                {
+                                    if (row["料號"].ToString().Trim() ==
+                                        chkrow["P/N"].ToString().ToUpper().Substring(0, 11))
+                                    {
+                                        chkCount += Convert.ToInt32(chkrow["BoardCount"]);
+                                        StartTime = chkrow["StartTime"].ToString();
+                                        EndTime = chkrow["EndTime"].ToString();
+                                    }
+                                }
+                                else
+                                {
+                                    if (row["料號"].ToString().Trim().Substring(0, 8) ==
+                                        chkrow["P/N"].ToString().ToUpper().Substring(0, 8))
+                                    {
+                                        chkCount += Convert.ToInt32(chkrow["BoardCount"]);
+                                        StartTime = chkrow["StartTime"].ToString();
+                                        EndTime = chkrow["EndTime"].ToString();
+                                    }
+                                }
                             }
+                        }
+                        catch (Exception ex)
+                        {
+                            writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r" +
+                                row["料號"].ToString().Trim() + "+" + chkrow["P/N"].ToString() + "\r");
+                            writerLog.Flush();
                         }
                     }
                     if (Convert.ToInt32(row["數量"]) > chkCount)
                     {
                         writerResult.WriteLine(row["批號"].ToString() + "\t" + row["料號"].ToString() + "\t" +
                             row["數量"].ToString() + "\t" + Convert.ToString(chkCount) + "\t" + StartTime + "\t" +
-                            EndTime + "\n\r");
+                            EndTime);
                     }
                 }
+                #endregion
+                writerResult.WriteLine();
+                writerResult.WriteLine();
+                writerResult.WriteLine("========== 有申報Ewproject，但未有驗孔紀錄的料號 ==========");
+                writerResult.WriteLine();
+                writerResult.WriteLine("批號\t料號\t數量\t開始時間\t結束時間\t人員");
+                #region 檢查是否有在Ewproject申報的批號，卻沒有進行驗板
+                foreach (DataRow sRow in ewTB.Rows)
+                {
+                    //若不符合，就把result+1，等內層迴圈跑完，result等於chkTB的筆數，就表示該筆料號未在驗孔機LOG出現過
+                    var result = 0;
+                    var chkTBrow = chkTB.Rows.Count;
+                    foreach (DataRow cRow in chkTB.Rows)
+                    {
+                        if (cRow["P/N"].ToString() != "")
+                        {
+                            if (cRow["P/N"].ToString().Length >= 11)
+                            {
+                                if (cRow["P/N"].ToString().ToUpper().Substring(0, 11).Contains(sRow["料號"].ToString().Trim()))
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    result++;
+                                }
+                            }
+                            else
+                            {
+                                if (cRow["P/N"].ToString().ToUpper().Substring(0, 8).Contains(sRow["料號"].ToString().Trim()))
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    result++;
+                                }
+                            }
+                        }
+                    }
+                    if (chkTBrow == result)
+                    {
+                        writerResult.WriteLine(sRow["批號"].ToString().Trim() + "\t" +
+                            sRow["料號"].ToString().Trim() + "\t" +
+                            sRow["數量"].ToString().Trim() + "\t" +
+                            sRow["開始時間"].ToString().Trim() + "\t" +
+                            sRow["結束時間"].ToString().Trim() + "\t" +
+                            sRow["人員"].ToString().Trim() + "\r");
+                    }
+                }
+                #endregion
                 writerResult.Flush();
                 writerResult.Close();
                 SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "checkhole@ewpcb.com.tw",
@@ -203,6 +285,52 @@ namespace EverydaySPnlCountService
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\n\r");
                 writerLog.Flush();
             }
+        }
+
+        private void ChkPrintingInk()
+        {
+            SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令單特殊油墨.txt";
+            writerResult = new StreamWriter(SaveFile);
+            var result = new DataTable();
+            ConnERP ce = new ConnERP(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
+            result = ce.ChkPrintingInk();
+            writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}",
+                result.Columns[0].ColumnName,
+                result.Columns[1].ColumnName,
+                result.Columns[2].ColumnName,
+                result.Columns[3].ColumnName,
+                result.Columns[4].ColumnName,
+                result.Columns[5].ColumnName,
+                result.Columns[6].ColumnName,
+                result.Columns[7].ColumnName,
+                result.Columns[8].ColumnName,
+                result.Columns[9].ColumnName,
+                result.Columns[10].ColumnName,
+                result.Columns[11].ColumnName,
+                result.Columns[12].ColumnName));
+            foreach (DataRow row in result.Rows)
+            {
+                writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}",
+                    row[0].ToString().Trim(),
+                    row[1].ToString().Trim(),
+                    row[2].ToString().Trim(),
+                    row[3].ToString().Trim(),
+                    row[4].ToString().Trim(),
+                    row[5].ToString().Trim(),
+                    row[6].ToString().Trim(),
+                    row[7].ToString().Trim(),
+                    row[8].ToString().Trim(),
+                    row[9].ToString().Trim(),
+                    row[10].ToString().Trim(),
+                    row[11].ToString().Trim(),
+                    row[12].ToString().Trim()));
+            }
+            writerResult.Flush();
+            writerResult.Close();
+            SendMail("sm4@ewpcb.com.tw", "製令單特殊油墨清單", "chkprintingink@ewpcb.com.tw",
+                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令單特殊油墨清單！",
+                "製令單特殊油墨清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>

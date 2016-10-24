@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnERP.cs" />
     <Compile Include="DFCheckHoleRecord.cs" />
     <Compile Include="MainMethod.cs" />
     <Compile Include="MainProgramInstaller.cs">
