@@ -34,6 +34,7 @@ namespace EverydaySPnlCountService
             timer.Elapsed += Timer_Elapsed;
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
             writerLog = File.AppendText(LogPath);
+            ChkDrillHole();
         }
 
         /// <summary>
@@ -163,14 +164,17 @@ namespace EverydaySPnlCountService
 
         private void ChkDrillHole()
         {
+            //設定要扣除的天數
+            var decreaseDate = -1;
             try
             {
-                SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單.txt";
+                SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") +
+                    " 驗孔數量稽核清單.txt";
                 writerResult = new StreamWriter(SaveFile);
                 writerResult.WriteLine("批號\t料號\t數量\t驗板數量\t驗板時間(起)\t驗板時間(迄)");
-                var ewTB = DFCheckHoleRecord.GetDFRecord(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
-                TXTtoTable loadingTxt = new TXTtoTable(@"\\192.168.1.200\DailyReport4\" +
-                    DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + ".txt");
+                var ewTB = DFCheckHoleRecord.GetDFRecord(DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd"));
+                TXTtoTable loadingTxt = new TXTtoTable(@"Z:\DailyReport4\" +
+                    DateTime.Now.AddDays(decreaseDate).ToString("yyyyMMdd") + ".txt");
                 var chkTB = loadingTxt.GetTable();
 
                 #region 開始稽核數量
@@ -277,8 +281,8 @@ namespace EverydaySPnlCountService
                 #endregion
                 writerResult.Flush();
                 writerResult.Close();
-                SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "checkhole@ewpcb.com.tw",
-                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單！",
+                SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "ewa05@ewpcb.com.tw",
+                    DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單！",
                     "鑽孔每日驗孔數量稽核清單，請詳閱附件。" + "<br/>" + "<br/>" +
                     "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
             }
