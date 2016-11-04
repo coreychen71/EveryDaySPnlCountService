@@ -34,7 +34,7 @@ namespace EverydaySPnlCountService
                 "where A.PaperDate = '" + pDate + "' and A.CancelDate is null and A.POType = B.POType and " +
                 "A.PartNum = C.PartNum and A.Revision = C.Revision and A.PartNum = D.PartNum and " +
                 "A.Revision = D.Revision and D.POP = 2 and " +
-                "(SUBSTRING(A.PartNum, 9, 1) in ('H', 'I', 'J') or C.LsmColor like '[紫,白]%' or C.CharColor like '黑%') " +
+                "(SUBSTRING(A.PartNum, 9, 1) in ('H', 'I', 'J') or C.LsmColor like '[紫,白,橘]%' or C.CharColor like '黑%') " +
                 "order by A.BuildDate desc";
             using(SqlConnection sqlcon=new SqlConnection(strCon))
             {

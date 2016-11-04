@@ -59,8 +59,8 @@ namespace EverydaySPnlCountService
             {
                 EquipMaintainRun();
             }
-            //每日00:10進行鑽孔申報比對驗孔紀錄
-            else if (CheckTime("00:10:00", "00:10:59"))
+            //每日00:20進行鑽孔申報比對驗孔紀錄
+            else if (CheckTime("00:20:00", "00:20:59"))
             {
                 ChkDrillHole();
             }
@@ -165,7 +165,8 @@ namespace EverydaySPnlCountService
         {
             //設定要扣除的天數
             var decreaseDate = -1;
-            var srcPath = @"Z:\";
+            //var srcPath = @"\\192.168.1.200\DailyReport4\";
+            var srcPath = @"E:\DailyReport4\";
             try
             {
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") +
