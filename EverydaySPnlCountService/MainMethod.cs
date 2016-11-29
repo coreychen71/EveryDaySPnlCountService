@@ -54,6 +54,11 @@ namespace EverydaySPnlCountService
             {
                 SPnlCountRun();
             }
+            //每日07:00進行品保客訴待處理(未逾期)清單
+            else if (CheckTime("07:00", "07:59"))
+            {
+                GetEveryDayCustomerComplaint();
+            }
             //每日16:00進行待修設備清單
             else if (CheckTime("16:00:00", "16:00:59"))
             {
@@ -338,6 +343,52 @@ namespace EverydaySPnlCountService
                 DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令單特殊油墨清單！",
                 "製令單特殊油墨清單，請詳閱附件。" + "<br/>" + "<br/>" +
                 "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+        }
+
+        private void GetEveryDayCustomerComplaint()
+        {
+            try
+            {
+                SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd") + " 品保待處理客訴通知(未逾期).xls";
+                ConnEWNAS ce = new ConnEWNAS();
+                DataTable[] result = new DataTable[] { ce.EveryDayCustomerComplaint() };
+                string[] strSheet = new string[] { "品保待處理客訴通知(未逾期)" };
+                DataTableToExcel(result, strSheet, SaveFile);
+                //輸出文字檔
+                //writerResult = new StreamWriter(SaveFile);
+                //writerResult.WriteLine("客戶別\t客訴日期\t週期\t料號\t客戶料號\t數量\t原因\t描述\t責任單位\t預計完成日\t" +
+                //    "登記人員\t登記日期");
+                //ConnEWNAS ce = new ConnEWNAS();
+                //var srcTB = ce.EveryDayCustomerComplaint();
+                //foreach (DataRow row in srcTB.Rows)
+                //{
+                //    writerResult.WriteLine(string.Format(
+                //        "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}",
+                //        row["客戶別"].ToString().Trim(),
+                //        row["客訴日期"].ToString().Trim(),
+                //        row["週期"].ToString().Trim(),
+                //        row["料號"].ToString().Trim(),
+                //        row["客戶料號"].ToString().Trim(),
+                //        row["數量"].ToString().Trim(),
+                //        row["原因"].ToString().Trim(),
+                //        row["描述"].ToString().Trim(),
+                //        row["責任單位"].ToString().Trim(),
+                //        row["預計完成日"].ToString().Trim(),
+                //        row["登記人員"].ToString().Trim(),
+                //        row["登記日期"].ToString().Trim()));
+                //}
+                //writerResult.Flush();
+                //writerResult.Close();
+                SendMail("sm4@ewpcb.com.tw", "品保待處理客訴通知(未逾期)", "qagroup@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd") + " 品保待處理客訴通知(未逾期)",
+                    "品保待處理客訴通知(未逾期)，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            }
+            catch (Exception ex)
+            {
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\n\r");
+                writerLog.Flush();
+            }
         }
 
         /// <summary>

@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnERP.cs" />
+    <Compile Include="ConnEWNAS.cs" />
     <Compile Include="DFCheckHoleRecord.cs" />
     <Compile Include="MainMethod.cs" />
     <Compile Include="MainProgramInstaller.cs">
