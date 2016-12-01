@@ -55,7 +55,7 @@ namespace EverydaySPnlCountService
                 SPnlCountRun();
             }
             //每日07:00進行品保客訴待處理(未逾期)清單
-            else if (CheckTime("07:00", "07:59"))
+            else if (CheckTime("07:00:00", "07:00:59"))
             {
                 GetEveryDayCustomerComplaint();
             }
