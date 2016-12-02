@@ -13,6 +13,10 @@ namespace EverydaySPnlCountService
 
         private string pDate = string.Empty;
 
+        /// <summary>
+        /// 指定單據日期
+        /// </summary>
+        /// <param name="PaperDate"></param>
         public ConnERP(string PaperDate)
         {
             pDate = PaperDate;
@@ -21,7 +25,6 @@ namespace EverydaySPnlCountService
         /// <summary>
         /// 取得特殊油墨製令單
         /// </summary>
-        /// <param name="PaperDate">製令單日期</param>
         /// <returns></returns>
         public DataTable ChkPrintingInk()
         {
@@ -46,6 +49,61 @@ namespace EverydaySPnlCountService
                     result.Load(read);
                 }
                 catch (Exception ex)
+                {
+                    MainMethod.InsertLog(ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得製令單據
+        /// </summary>
+        /// <returns></returns>
+        public DataTable GetIssuePaper()
+        {
+            var result = new DataTable();
+            var strComm = "select A.PaperNum '製令單號',CONVERT(char(10),A.PaperDate,120) '單據日期',A.PartNum '料號'," +
+                "A.Revision '版序',B.POTypeName '訂單類型',CONVERT(int, A.TotalPcs) '製令總Pcs數'," +
+                "CONVERT(char(10), A.ExpStkTime, 120) '期望繳庫日',A.FinishUser '審核人員' " +
+                "from FMEdIssueMain A,FMEdPOType B where A.PaperDate = '" + pDate + "' and A.Finished = 1 and " +
+                "A.POType = B.POType order by A.BuildDate,A.PartNum";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog(ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得現帳410&610預備報廢帳
+        /// </summary>
+        /// <returns></returns>
+        public DataTable GetScrapWIP()
+        {
+            var result = new DataTable();
+            var strComm = "sp_executesql N'exec FMEdProcSearch @P1,@P2',N'@P1 varchar(255),@P2 int'," +
+                "'and (t1.ProcCode=''410'' or t1.ProcCode=''610'') and t1.LotStatus=2',0";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch(Exception ex)
                 {
                     MainMethod.InsertLog(ex.Message);
                 }

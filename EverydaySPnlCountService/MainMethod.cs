@@ -64,6 +64,11 @@ namespace EverydaySPnlCountService
             {
                 EquipMaintainRun();
             }
+            //每日00:10進行每日製令稽核現帳預報廢清單
+            else if (CheckTime("00:10:00", "00:10:59"))
+            {
+                ChkIssueAndScrapWIP();
+            }
             //每日00:20進行鑽孔申報比對驗孔紀錄
             else if (CheckTime("00:20:00", "00:20:59"))
             {
@@ -137,7 +142,7 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  SPnlCountRun()" + ex.Message + "\r\n");
                 writerLog.Flush();
             }
         }
@@ -160,7 +165,7 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  EquipMaintainRun()" + ex.Message + "\r\n");
                 writerLog.Flush();
             }
         }
@@ -294,7 +299,7 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\n\r");
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkDrillHole()" + ex.Message + "\n\r");
                 writerLog.Flush();
             }
         }
@@ -386,7 +391,82 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\n\r");
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  GetEveryDayCustomerComplaint()" + 
+                    ex.Message + "\n\r");
+                writerLog.Flush();
+            }
+        }
+
+        private void ChkIssueAndScrapWIP()
+        {
+            var result = new DataTable();
+            var issue = new DataTable();
+            var scrap = new DataTable();
+            result.Columns.Add("製令單號");
+            result.Columns.Add("單據日期");
+            result.Columns.Add("料號");
+            result.Columns.Add("版序");
+            result.Columns.Add("訂單類型");
+            result.Columns.Add("製令總Pcs數");
+            result.Columns.Add("期望繳庫日");
+            result.Columns.Add("審核人員");
+            result.Columns.Add("提出製程");
+            result.Columns.Add("代碼");
+            result.Columns.Add("批號");
+            result.Columns.Add("狀態");
+            result.Columns.Add("階段名稱");
+            result.Columns.Add("型狀");
+            result.Columns.Add("排版");
+            result.Columns.Add("預報廢數量");
+            result.Columns.Add("批量種類");
+            try
+            {
+                ConnERP ce = new ConnERP(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
+                issue = ce.GetIssuePaper();
+                scrap = ce.GetScrapWIP();
+                foreach (DataRow issueRow in issue.Rows)
+                {
+                    foreach (DataRow scrapRow in scrap.Rows)
+                    {
+                        if (issueRow["料號"].ToString().Trim() == scrapRow["PartNum"].ToString().Trim() &
+                            issueRow["版序"].ToString().Trim() == scrapRow["Revision"].ToString().Trim())
+                        {
+                            DataRow row = result.NewRow();
+                            row["製令單號"] = issueRow["製令單號"].ToString().Trim();
+                            row["單據日期"] = issueRow["單據日期"].ToString().Trim();
+                            row["料號"] = issueRow["料號"].ToString().Trim();
+                            row["版序"] = issueRow["版序"].ToString().Trim();
+                            row["訂單類型"] = issueRow["訂單類型"].ToString().Trim();
+                            row["製令總Pcs數"] = issueRow["製令總Pcs數"].ToString().Trim();
+                            row["期望繳庫日"] = issueRow["期望繳庫日"].ToString().Trim();
+                            row["審核人員"] = issueRow["審核人員"].ToString().Trim();
+                            row["提出製程"] = scrapRow["ProcName"].ToString().Trim();
+                            row["代碼"] = scrapRow["ProcCode"].ToString().Trim();
+                            row["批號"] = scrapRow["LotNum"].ToString().Trim();
+                            row["狀態"] = scrapRow["LotStatusName"].ToString().Trim();
+                            row["階段名稱"] = scrapRow["LayerName"].ToString().Trim();
+                            row["型狀"] = scrapRow["POPName"].ToString().Trim();
+                            row["排版"] = scrapRow["POP_SP"].ToString().Trim();
+                            row["預報廢數量"] = Convert.ToInt32(scrapRow["Qnty"]);
+                            row["批量種類"] = scrapRow["LotNotes"].ToString().Trim();
+                            result.Rows.Add(row);
+                        }
+                    }
+                }
+                SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
+                    " 製令稽核現帳預報廢清單.xls";
+                DataTable[] resultTB = new DataTable[] { result };
+                string[] strSheet = new string[] { "製令稽核現帳預報廢清單" };
+                DataTableToExcel(resultTB, strSheet, SaveFile);
+                SendMail("sm4@ewpcb.com.tw", "每日製令稽核現帳預報廢清單", "chkissuescrapwip@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令稽核現帳預報廢清單",
+                    "製令稽核現帳預報廢清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            }
+            catch (Exception ex)
+            {
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
+                    ex.Message + "\n\r");
                 writerLog.Flush();
             }
         }
