@@ -49,32 +49,32 @@ namespace EverydaySPnlCountService
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             timer.Stop();
-            //每日06: 30進行SPnl數統計
+            //每日06: 30進行SPnl數統計(TXT)
             if (CheckTime("06:30:00", "06:30:59"))
             {
                 SPnlCountRun();
             }
-            //每日07:00進行品保客訴待處理(未逾期)清單
+            //每日07:00進行品保客訴待處理(未逾期)清單(Excel)
             else if (CheckTime("07:00:00", "07:00:59"))
             {
                 GetEveryDayCustomerComplaint();
             }
-            //每日16:00進行待修設備清單
+            //每日16:00進行待修設備清單(Excel)
             else if (CheckTime("16:00:00", "16:00:59"))
             {
                 EquipMaintainRun();
             }
-            //每日00:10進行每日製令稽核現帳預報廢清單
+            //每日00:10進行每日製令稽核現帳預報廢清單(Excel)
             else if (CheckTime("00:10:00", "00:10:59"))
             {
                 ChkIssueAndScrapWIP();
             }
-            //每日00:20進行鑽孔申報比對驗孔紀錄
+            //每日00:20進行鑽孔申報比對驗孔紀錄(TXT)
             else if (CheckTime("00:20:00", "00:20:59"))
             {
                 ChkDrillHole();
             }
-            //每日00: 30進行製令單料號檢查是否有特殊油墨需求
+            //每日00: 30進行製令單料號檢查是否有特殊油墨需求(TXT)
             else if (CheckTime("00:30:00", "00:30:59"))
             {
                 ChkPrintingInk();
@@ -180,7 +180,7 @@ namespace EverydaySPnlCountService
             try
             {
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") +
-                    " 驗孔數量稽核清單.txt";
+                    "驗孔數量稽核清單.txt";
                 writerResult = new StreamWriter(SaveFile);
                 writerResult.WriteLine("批號\t料號\t數量\t驗板數量\t驗板時間(起)\t驗板時間(迄)");
                 var ewTB = DFCheckHoleRecord.GetDFRecord(DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd"));
@@ -306,7 +306,7 @@ namespace EverydaySPnlCountService
 
         private void ChkPrintingInk()
         {
-            SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令單特殊油墨.txt";
+            SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "製令單特殊油墨.txt";
             writerResult = new StreamWriter(SaveFile);
             var result = new DataTable();
             ConnERP ce = new ConnERP(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
@@ -354,7 +354,7 @@ namespace EverydaySPnlCountService
         {
             try
             {
-                SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd") + " 品保待處理客訴通知(未逾期).xls";
+                SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd") + "品保待處理客訴通知(未逾期).xls";
                 ConnEWNAS ce = new ConnEWNAS();
                 DataTable[] result = new DataTable[] { ce.EveryDayCustomerComplaint() };
                 string[] strSheet = new string[] { "品保待處理客訴通知(未逾期)" };
@@ -454,7 +454,7 @@ namespace EverydaySPnlCountService
                     }
                 }
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
-                    " 製令稽核現帳預報廢清單.xls";
+                    "製令稽核現帳預報廢清單.xls";
                 DataTable[] resultTB = new DataTable[] { result };
                 string[] strSheet = new string[] { "製令稽核現帳預報廢清單" };
                 DataTableToExcel(resultTB, strSheet, SaveFile);
