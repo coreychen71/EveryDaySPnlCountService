@@ -37,7 +37,7 @@ namespace EverydaySPnlCountService
                 "where A.PaperDate = '" + pDate + "' and A.CancelDate is null and A.POType = B.POType and " +
                 "A.PartNum = C.PartNum and A.Revision = C.Revision and A.PartNum = D.PartNum and " +
                 "A.Revision = D.Revision and D.POP = 2 and " +
-                "(SUBSTRING(A.PartNum, 9, 1) in ('H', 'I', 'J') or C.LsmColor like '[紫,白,橘]%' or C.CharColor like '黑%') " +
+                "(SUBSTRING(A.PartNum, 9, 1) in ('H', 'I', 'J') or C.LsmColor like '[紅,紫,白,橘]%' or C.CharColor like '黑%') " +
                 "order by A.BuildDate desc";
             using(SqlConnection sqlcon=new SqlConnection(strCon))
             {
@@ -104,6 +104,38 @@ namespace EverydaySPnlCountService
                     result.Load(reader);
                 }
                 catch(Exception ex)
+                {
+                    MainMethod.InsertLog(ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 檢查每日製令單的料號第9碼是否有含 I、V、Y (需使用樹脂)
+        /// </summary>
+        /// <returns></returns>
+        public DataTable ChkIssueResin()
+        {
+            var result = new DataTable();
+            var strComm = "select A.PaperNum as '製令單號',A.PartNum as '料號',A.Revision as '版序'," +
+                "C.Length as '發料/L', C.Width as '發料/W',B.POTypeName as '訂單種類'," +
+                "CONVERT(int, A.TotalPcs) as '製令總數量/Pcs', CONVERT(int, A.SpareQnty) as '備品數/Pcs'," +
+                "CONVERT(char(10), A.ExpStkTime, 120) as '預計繳庫日', A.LotNotes as '批量種類' " +
+                "from FMEdIssueMain A,FMEdPOType B, EMOdProdPOP C " +
+                "where A.PaperDate = '" + pDate + "' and A.CancelDate is null and A.POType = B.POType and " +
+                "A.PartNum = C.PartNum and A.Revision = C.Revision and C.POP = 2 and " +
+                "SUBSTRING(A.PartNum, 9, 1) in ('I', 'V', 'Y') order by A.PartNum";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
                 {
                     MainMethod.InsertLog(ex.Message);
                 }

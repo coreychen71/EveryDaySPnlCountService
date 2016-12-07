@@ -74,7 +74,7 @@ namespace EverydaySPnlCountService
             {
                 ChkDrillHole();
             }
-            //每日00: 30進行製令單料號檢查是否有特殊油墨需求(TXT)
+            //每日00: 30進行製令單料號檢查是否有特殊油墨與樹脂需求(TXT)
             else if (CheckTime("00:30:00", "00:30:59"))
             {
                 ChkPrintingInk();
@@ -341,6 +341,39 @@ namespace EverydaySPnlCountService
                     row[10].ToString().Trim(),
                     row[11].ToString().Trim(),
                     row[12].ToString().Trim()));
+            }
+
+            //2016-12-07 應工程課長要求，再加入料號需使用到樹脂的檢查
+            result.Clear();
+            result = ce.ChkIssueResin();
+            writerResult.WriteLine();
+            writerResult.WriteLine();
+            writerResult.WriteLine("==================== 樹脂清單 ====================");
+            writerResult.WriteLine();
+            writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}",
+                result.Columns[0].ColumnName,
+                result.Columns[1].ColumnName,
+                result.Columns[2].ColumnName,
+                result.Columns[3].ColumnName,
+                result.Columns[4].ColumnName,
+                result.Columns[5].ColumnName,
+                result.Columns[6].ColumnName,
+                result.Columns[7].ColumnName,
+                result.Columns[8].ColumnName,
+                result.Columns[9].ColumnName));
+            foreach (DataRow row in result.Rows)
+            {
+                writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}",
+                    row[0].ToString().Trim(),
+                    row[1].ToString().Trim(),
+                    row[2].ToString().Trim(),
+                    row[3].ToString().Trim(),
+                    row[4].ToString().Trim(),
+                    row[5].ToString().Trim(),
+                    row[6].ToString().Trim(),
+                    row[7].ToString().Trim(),
+                    row[8].ToString().Trim(),
+                    row[9].ToString().Trim()));
             }
             writerResult.Flush();
             writerResult.Close();
