@@ -343,7 +343,7 @@ namespace EverydaySPnlCountService
                     row[12].ToString().Trim()));
             }
 
-            //2016-12-07 應工程課長要求，再加入料號需使用到樹脂的檢查
+            //2016-12-07 工程課長要求，再加入料號需使用到樹脂的檢查
             result.Clear();
             result = ce.ChkIssueResin();
             writerResult.WriteLine();
@@ -595,6 +595,13 @@ namespace EverydaySPnlCountService
             MailMessage SendMail = new MailMessage(ReceiverAddress, SendAddress);
             //Mail以HTML格式寄送
             SendMail.IsBodyHtml = true;
+
+            /*
+            ##### 2016/12/08 #####
+            設定信件標頭走Base64傳輸，避免中文檔名附件變成亂碼
+            */
+            SendMail.Headers.Add("Content-Transfer-Encoding", "base64");
+
             //設定信件內容編碼為UTF8
             SendMail.BodyEncoding = Encoding.UTF8;
             //設定信件主旨編碼為UTF8
