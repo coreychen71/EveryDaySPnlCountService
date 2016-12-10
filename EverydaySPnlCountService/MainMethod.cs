@@ -387,7 +387,7 @@ namespace EverydaySPnlCountService
         {
             try
             {
-                SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd") + "品保待處理客訴通知(未逾期).xls";
+                SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd") + "未逾期.xls";
                 ConnEWNAS ce = new ConnEWNAS();
                 DataTable[] result = new DataTable[] { ce.EveryDayCustomerComplaint() };
                 string[] strSheet = new string[] { "品保待處理客訴通知(未逾期)" };
@@ -487,7 +487,7 @@ namespace EverydaySPnlCountService
                     }
                 }
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
-                    "製令稽核現帳預報廢清單.xls";
+                    "清單.xls";
                 DataTable[] resultTB = new DataTable[] { result };
                 string[] strSheet = new string[] { "製令稽核現帳預報廢清單" };
                 DataTableToExcel(resultTB, strSheet, SaveFile);
