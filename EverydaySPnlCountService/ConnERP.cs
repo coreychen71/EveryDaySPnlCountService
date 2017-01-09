@@ -50,7 +50,7 @@ namespace EverydaySPnlCountService
                 }
                 catch (Exception ex)
                 {
-                    MainMethod.InsertLog(ex.Message);
+                    MainMethod.InsertLog("ConnERP.ChkPrintingInk()-" + ex.Message);
                 }
             }
             return result;
@@ -79,7 +79,7 @@ namespace EverydaySPnlCountService
                 }
                 catch (Exception ex)
                 {
-                    MainMethod.InsertLog(ex.Message);
+                    MainMethod.InsertLog("ConnERP.GetIssuePaper()-" + ex.Message);
                 }
             }
             return result;
@@ -105,7 +105,7 @@ namespace EverydaySPnlCountService
                 }
                 catch(Exception ex)
                 {
-                    MainMethod.InsertLog(ex.Message);
+                    MainMethod.InsertLog("ConnERP.GetScrapWIP()-" + ex.Message);
                 }
             }
             return result;
@@ -137,7 +137,64 @@ namespace EverydaySPnlCountService
                 }
                 catch (Exception ex)
                 {
-                    MainMethod.InsertLog(ex.Message);
+                    MainMethod.InsertLog("C.ERP.ChkIssueResin()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得批號資訊明細
+        /// </summary>
+        /// <param name="LotNum">批號</param>
+        /// <returns></returns>
+        public static DataTable GetLotInfoSreach(string LotNum)
+        {
+            var result = new DataTable();
+            var strComm = "sp_executesql N'exec FMEdLotInfoSearch @P1',N'@P1 varchar(255)'," +
+                "'and t1.LotNum=''" + LotNum + "'''";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ConnEWNAS.GetLotInfoSreach()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 檢查製令單號是否有在傑偲調帳子表裡，若有表示有增帳。
+        /// 有就回傳true
+        /// </summary>
+        /// <param name="MotherIssueLotNum">母製令單號</param>
+        /// <returns>bool</returns>
+        public static bool ChkFMEdTuneSub(string MotherIssueLotNum)
+        {
+            var result = false;
+            var strComm = "select * from FMEdTuneSub where MotherIssueNum='" + MotherIssueLotNum + "'";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        result = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ConnEWNAS.ChkFMEdTuneSub()-" + ex.Message);
                 }
             }
             return result;

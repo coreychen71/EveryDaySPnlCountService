@@ -34,6 +34,12 @@ namespace EverydaySPnlCountService
             timer.Elapsed += Timer_Elapsed;
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
             writerLog = File.AppendText(LogPath);
+            //SPnlCountRun();
+            //GetEveryDayCustomerComplaint();
+            //ChkDrillHole();
+            //ChkPrintingInk();
+            //ChkIssueAndScrapWIP();
+            //ChkScrapWIPLog();
         }
 
         /// <summary>
@@ -69,6 +75,11 @@ namespace EverydaySPnlCountService
             {
                 ChkIssueAndScrapWIP();
             }
+            //每日00:15進行每日製令稽核現帳預報廢未增帳清單(Excel)
+            else if (CheckTime("00:15:00", "00:15:59"))
+            {
+                ChkScrapWIPLog();
+            }
             //每日00:20進行鑽孔申報比對驗孔紀錄(TXT)
             else if (CheckTime("00:20:00", "00:20:59"))
             {
@@ -82,6 +93,12 @@ namespace EverydaySPnlCountService
             timer.Start();
         }
 
+        /// <summary>
+        /// 檢查目前的系統時間是否符合輸入的二者時間區間內
+        /// </summary>
+        /// <param name="time1">第一時間</param>
+        /// <param name="time2">第二時間</param>
+        /// <returns></returns>
         private bool CheckTime(string time1,string time2)
         {
             //##### 2016/07/30 改用判斷是否在指定的時間區段內 #####//
@@ -115,6 +132,9 @@ namespace EverydaySPnlCountService
             */
         }
 
+        /// <summary>
+        /// 取得一個月前至當天日期的每日預估出貨SPnl數量
+        /// </summary>
         private void SPnlCountRun()
         {
             try
@@ -147,7 +167,9 @@ namespace EverydaySPnlCountService
             }
         }
 
-
+        /// <summary>
+        /// 取得每日設備待維修案件
+        /// </summary>
         private void EquipMaintainRun()
         {
             try
@@ -170,7 +192,9 @@ namespace EverydaySPnlCountService
             }
         }
 
-
+        /// <summary>
+        /// 稽核鑽孔課驗孔機每日驗孔紀錄
+        /// </summary>
         private void ChkDrillHole()
         {
             //設定要扣除的天數
@@ -304,6 +328,9 @@ namespace EverydaySPnlCountService
             }
         }
 
+        /// <summary>
+        /// 檢查每日製令料號的防焊油墨是否有特殊油墨需求
+        /// </summary>
         private void ChkPrintingInk()
         {
             SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "製令單特殊油墨.txt";
@@ -383,6 +410,9 @@ namespace EverydaySPnlCountService
                 "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
+        /// <summary>
+        /// 取得每日待處理客訴事件(未逾期)
+        /// </summary>
         private void GetEveryDayCustomerComplaint()
         {
             try
@@ -430,6 +460,9 @@ namespace EverydaySPnlCountService
             }
         }
 
+        /// <summary>
+        /// 檢查防焊預報廢現帳清單是否有被下新製令單
+        /// </summary>
         private void ChkIssueAndScrapWIP()
         {
             var result = new DataTable();
@@ -486,6 +519,28 @@ namespace EverydaySPnlCountService
                         }
                     }
                 }
+                ConnEWNAS cewnas = new ConnEWNAS();
+                foreach (DataRow row in result.Rows)
+                {
+                    cewnas.InsertScrapWIPLog(
+                        row["製令單號"].ToString().Trim(),
+                        row["單據日期"].ToString().Trim(),
+                        row["料號"].ToString().Trim(),
+                        row["版序"].ToString().Trim(),
+                        row["訂單類型"].ToString().Trim(),
+                        row["製令總Pcs數"].ToString().Trim(),
+                        row["期望繳庫日"].ToString().Trim(),
+                        row["審核人員"].ToString().Trim(),
+                        row["提出製程"].ToString().Trim(),
+                        row["代碼"].ToString().Trim(),
+                        row["批號"].ToString().Trim(),
+                        row["狀態"].ToString().Trim(),
+                        row["階段名稱"].ToString().Trim(),
+                        row["型狀"].ToString().Trim(),
+                        row["排版"].ToString().Trim(),
+                        row["預報廢數量"].ToString().Trim(),
+                        row["批量種類"].ToString().Trim());
+                }
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
                     "清單.xls";
                 DataTable[] resultTB = new DataTable[] { result };
@@ -499,6 +554,70 @@ namespace EverydaySPnlCountService
             catch (Exception ex)
             {
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
+                    ex.Message + "\n\r");
+                writerLog.Flush();
+            }
+        }
+
+        /// <summary>
+        /// 檢查預報廢現帳LOG裡的製令單日期是否已達到二天
+        /// 2天內未增帳就發信通知，已增帳就從LOG裡移除
+        /// </summary>
+        private void ChkScrapWIPLog()
+        {
+            ConnEWNAS ewnas = new ConnEWNAS();
+            var ScrapWIPLog = ewnas.GetScrapWIPLog();
+            var strNowDate = DateTime.Now;
+            var result = ScrapWIPLog.Clone();
+            foreach (DataRow row in ScrapWIPLog.Rows)
+            {
+                var IssueDate = DateTime.Parse(row["IssuePaperDate"].ToString().Trim());
+                if (IssueDate.AddDays(2) <= strNowDate)
+                {
+                    var LotInfo = ConnERP.GetLotInfoSreach(row["ScrapLotNum"].ToString().Trim());
+                    if (ConnERP.ChkFMEdTuneSub(LotInfo.Rows[0]["IssueNum"].ToString().Trim()))
+                    {
+                        ewnas.DeleteScrapWIPLog(row["ID"].ToString());
+                    }
+                    else
+                    {
+                        result.ImportRow(row);
+                    }
+                }
+            }
+            result.Columns.RemoveAt(0);
+            result.Columns[0].ColumnName="製令單號";
+            result.Columns[1].ColumnName="單據日期";
+            result.Columns[2].ColumnName="料號";
+            result.Columns[3].ColumnName="版序";
+            result.Columns[4].ColumnName="訂單類型";
+            result.Columns[5].ColumnName="製令總Pcs數";
+            result.Columns[6].ColumnName="期望繳庫日";
+            result.Columns[7].ColumnName="審核人員";
+            result.Columns[8].ColumnName="提出製程";
+            result.Columns[9].ColumnName="代碼";
+            result.Columns[10].ColumnName="批號";
+            result.Columns[11].ColumnName="狀態";
+            result.Columns[12].ColumnName="階段名稱";
+            result.Columns[13].ColumnName="型狀";
+            result.Columns[14].ColumnName="排版";
+            result.Columns[15].ColumnName="預報廢數量";
+            result.Columns[16].ColumnName="批量種類";
+            try
+            {
+                SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
+                    "清單.xls";
+                DataTable[] resultTB = new DataTable[] { result };
+                string[] strSheet = new string[] { "現帳預報廢未增帳清單" };
+                DataTableToExcel(resultTB, strSheet, SaveFile);
+                SendMail("sm4@ewpcb.com.tw", "現帳預報廢未增帳清單", "chkissuescrapwip@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 現帳預報廢未增帳清單",
+                    "現帳預報廢未增帳清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            }
+            catch (Exception ex)
+            {
+                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkScrapWIPLog()" +
                     ex.Message + "\n\r");
                 writerLog.Flush();
             }
