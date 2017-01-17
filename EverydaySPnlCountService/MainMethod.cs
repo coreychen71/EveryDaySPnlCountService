@@ -338,7 +338,8 @@ namespace EverydaySPnlCountService
             var result = new DataTable();
             ConnERP ce = new ConnERP(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
             result = ce.ChkPrintingInk();
-            writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}",
+            writerResult.WriteLine(
+                string.Format("{0}\t{1}\t\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t\t{10}\t\t{11}",
                 result.Columns[0].ColumnName,
                 result.Columns[1].ColumnName,
                 result.Columns[2].ColumnName,
@@ -350,11 +351,11 @@ namespace EverydaySPnlCountService
                 result.Columns[8].ColumnName,
                 result.Columns[9].ColumnName,
                 result.Columns[10].ColumnName,
-                result.Columns[11].ColumnName,
-                result.Columns[12].ColumnName));
+                result.Columns[11].ColumnName));
             foreach (DataRow row in result.Rows)
             {
-                writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}",
+                writerResult.WriteLine(
+                    string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t\t\t{6}\t{7}\t{8}\t\t{9}\t{10}\t{11}",
                     row[0].ToString().Trim(),
                     row[1].ToString().Trim(),
                     row[2].ToString().Trim(),
@@ -366,8 +367,7 @@ namespace EverydaySPnlCountService
                     row[8].ToString().Trim(),
                     row[9].ToString().Trim(),
                     row[10].ToString().Trim(),
-                    row[11].ToString().Trim(),
-                    row[12].ToString().Trim()));
+                    row[11].ToString().Trim()));
             }
 
             //2016-12-07 工程課長要求，再加入料號需使用到樹脂的檢查
@@ -377,7 +377,7 @@ namespace EverydaySPnlCountService
             writerResult.WriteLine();
             writerResult.WriteLine("==================== 樹脂清單 ====================");
             writerResult.WriteLine();
-            writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}",
+            writerResult.WriteLine(string.Format("{0}\t{1}\t\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}",
                 result.Columns[0].ColumnName,
                 result.Columns[1].ColumnName,
                 result.Columns[2].ColumnName,
@@ -386,11 +386,10 @@ namespace EverydaySPnlCountService
                 result.Columns[5].ColumnName,
                 result.Columns[6].ColumnName,
                 result.Columns[7].ColumnName,
-                result.Columns[8].ColumnName,
-                result.Columns[9].ColumnName));
+                result.Columns[8].ColumnName));
             foreach (DataRow row in result.Rows)
             {
-                writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}",
+                writerResult.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t\t\t{6}\t{7}\t{8}",
                     row[0].ToString().Trim(),
                     row[1].ToString().Trim(),
                     row[2].ToString().Trim(),
@@ -399,8 +398,7 @@ namespace EverydaySPnlCountService
                     row[5].ToString().Trim(),
                     row[6].ToString().Trim(),
                     row[7].ToString().Trim(),
-                    row[8].ToString().Trim(),
-                    row[9].ToString().Trim()));
+                    row[8].ToString().Trim()));
             }
             writerResult.Flush();
             writerResult.Close();

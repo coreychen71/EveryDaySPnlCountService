@@ -29,13 +29,14 @@ namespace EverydaySPnlCountService
         public DataTable ChkPrintingInk()
         {
             var result = new DataTable();
-            var strComm = "select A.PaperNum as '製令單號',A.PartNum as '料號',A.Revision as '版序',D.Length as '發料/L'," +
-                "D.Width as '發料/W',B.POTypeName as '訂單種類',CONVERT(int, A.TotalPcs) as '製令總數量/Pcs'," +
-                "CONVERT(int, A.SpareQnty) as '備品數/Pcs',CONVERT(char(10), A.ExpStkTime, 120) as '預計繳庫日'," +
-                "A.LotNotes as '批量種類',C.LsmColor as '防焊TOP',C.LsmColorB as '防焊BOT',C.CharColor as '文字顏色 '" +
-                "from FMEdIssueMain A,FMEdPOType B, EMOdProdInfo C,EMOdProdPOP D " +
+            var strComm = "select A.PaperNum '製令單號', A.PartNum '料號', A.Revision '版序', D.Length '發料/L'," +
+                "D.Width '發料/W',B.POTypeName '訂單種類', CONVERT(int, E.IOQnty) '製令PNL數'," +
+                "CONVERT(char(10), A.ExpStkTime, 120) '預計繳庫日', A.LotNotes '批量種類', C.LsmColor '防焊TOP'," +
+                "C.LsmColorB '防焊BOT', C.CharColor '文字顏色' from FMEdIssueMain A,FMEdPOType B, EMOdProdInfo C," +
+                "EMOdProdPOP D, FMEdIssueSub E " +
                 "where A.PaperDate = '" + pDate + "' and A.CancelDate is null and A.POType = B.POType and " +
                 "A.PartNum = C.PartNum and A.Revision = C.Revision and A.PartNum = D.PartNum and " +
+                "A.PaperNum = E.PaperNum and A.PartNum = E.PartNum and E.Item = 1 and " +
                 "A.Revision = D.Revision and D.POP = 2 and " +
                 "(SUBSTRING(A.PartNum, 9, 1) in ('H', 'I', 'J') or C.LsmColor like '[紅,紫,白,橘]%' or C.CharColor like '黑%') " +
                 "order by A.BuildDate desc";
@@ -118,14 +119,15 @@ namespace EverydaySPnlCountService
         public DataTable ChkIssueResin()
         {
             var result = new DataTable();
-            var strComm = "select A.PaperNum as '製令單號',A.PartNum as '料號',A.Revision as '版序'," +
-                "C.Length as '發料/L', C.Width as '發料/W',B.POTypeName as '訂單種類'," +
-                "CONVERT(int, A.TotalPcs) as '製令總數量/Pcs', CONVERT(int, A.SpareQnty) as '備品數/Pcs'," +
-                "CONVERT(char(10), A.ExpStkTime, 120) as '預計繳庫日', A.LotNotes as '批量種類' " +
-                "from FMEdIssueMain A,FMEdPOType B, EMOdProdPOP C " +
+            var strComm = "select A.PaperNum '製令單號', A.PartNum '料號', A.Revision '版序', C.Length '發料/L'," +
+                "C.Width '發料/W', B.POTypeName '訂單種類', CONVERT(int, D.IOQnty) '製令PNL數', CONVERT(char(10)," +
+                "A.ExpStkTime, 120) '預計繳庫日', A.LotNotes '批量種類' " +
+                "from FMEdIssueMain A,FMEdPOType B, EMOdProdPOP C,FMEdIssueSub D " +
                 "where A.PaperDate = '" + pDate + "' and A.CancelDate is null and A.POType = B.POType and " +
                 "A.PartNum = C.PartNum and A.Revision = C.Revision and C.POP = 2 and " +
-                "SUBSTRING(A.PartNum, 9, 1) in ('I', 'V', 'Y') order by A.PartNum";
+                "A.PaperNum = D.PaperNum and A.PartNum = D.PartNum and D.Item = 1 and " +
+                "SUBSTRING(A.PartNum, 9, 1) in ('I', 'V', 'Y') " +
+                "order by A.PartNum";
             using (SqlConnection sqlcon = new SqlConnection(strCon))
             {
                 SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
