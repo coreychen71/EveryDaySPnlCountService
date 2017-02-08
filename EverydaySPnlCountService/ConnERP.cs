@@ -201,5 +201,38 @@ namespace EverydaySPnlCountService
             }
             return result;
         }
+
+        /// <summary>
+        /// 檢查是否有此批號的批號報廢單(狀態=>報廢轉正常)
+        /// 生管人員幫現場預報帳增帳的方式
+        /// </summary>
+        /// <param name="LotNum">批號</param>
+        /// <returns></returns>
+        public static bool ChkFMEdStatusScrap(string LotNum)
+        {
+            var result = false;
+            var strComm = "select A.PaperNum,A.PaperDate,B.LotNum,B.PartNum,B.Revision,B.LayerId,B.POP,B.Qnty," +
+                "B.IsScrap,C.FinishedName,A.FinishUser from FMEdStatusScrapMain A, FMEdStatusScrapSub B," +
+                "CURdPaperFinished C where B.LotNum = '" + LotNum + "' and B.IsScrap = 0 and A.Finished = 1 and " +
+                "B.PaperNum = A.PaperNum and A.Finished = C.Finished";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader Reader = sqlcomm.ExecuteReader();
+                    if (Reader.HasRows)
+                    {
+                        result = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ConnEWNAS.ChkFMEdTuneSub()-" + ex.Message);
+                }
+            }
+            return result;
+        }
     }
 }

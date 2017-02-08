@@ -153,8 +153,10 @@ namespace EverydaySPnlCountService
                 }
                 writerResult.Flush();
                 writerResult.Close();
+                writerResult.Dispose();
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
                 writerLog.Flush();
+                writerLog.Close();
                 SendMail("sm4@ewpcb.com.tw", "每日預估入庫SPnl數量統計", "spnlcount@ewpcb.com.tw",
                     DateTime.Now.ToString("yyyy-MM-dd") + " 每日預估入庫SPnl數量統計！",
                     "每日預估入庫SPnl數量統計，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -180,6 +182,7 @@ namespace EverydaySPnlCountService
                 DataTableToExcel(result, strSheet, SaveFile);
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
                 writerLog.Flush();
+                writerLog.Close();
                 SendMail("sm4@ewpcb.com.tw", "每日待修設備清單", "equip@ewpcb.com.tw",
                     DateTime.Now.ToString("yyyy-MM-dd") + " 每日待修設備清單！",
                     "每日待修設備清單，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -316,6 +319,7 @@ namespace EverydaySPnlCountService
                 #endregion
                 writerResult.Flush();
                 writerResult.Close();
+                writerResult.Dispose();
                 SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "checkhole@ewpcb.com.tw",
                     DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單！",
                     "鑽孔每日驗孔數量稽核清單，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -325,6 +329,8 @@ namespace EverydaySPnlCountService
             {
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkDrillHole()" + ex.Message + "\n\r");
                 writerLog.Flush();
+                writerLog.Close();
+                writerLog.Dispose();
             }
         }
 
@@ -402,6 +408,7 @@ namespace EverydaySPnlCountService
             }
             writerResult.Flush();
             writerResult.Close();
+            writerResult.Dispose();
             SendMail("sm4@ewpcb.com.tw", "製令單特殊油墨清單", "chkprintingink@ewpcb.com.tw",
                 DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令單特殊油墨清單！",
                 "製令單特殊油墨清單，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -455,6 +462,8 @@ namespace EverydaySPnlCountService
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  GetEveryDayCustomerComplaint()" + 
                     ex.Message + "\n\r");
                 writerLog.Flush();
+                writerLog.Close();
+                writerLog.Dispose();
             }
         }
 
@@ -554,6 +563,8 @@ namespace EverydaySPnlCountService
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
                     ex.Message + "\n\r");
                 writerLog.Flush();
+                writerLog.Close();
+                writerLog.Dispose();
             }
         }
 
@@ -572,8 +583,7 @@ namespace EverydaySPnlCountService
                 var IssueDate = DateTime.Parse(row["IssuePaperDate"].ToString().Trim());
                 if (IssueDate.AddDays(2) <= strNowDate)
                 {
-                    var LotInfo = ConnERP.GetLotInfoSreach(row["ScrapLotNum"].ToString().Trim());
-                    if (ConnERP.ChkFMEdTuneSub(LotInfo.Rows[0]["IssueNum"].ToString().Trim()))
+                    if (ConnERP.ChkFMEdStatusScrap(row["ScrapLotNum"].ToString().Trim()))
                     {
                         ewnas.DeleteScrapWIPLog(row["ID"].ToString());
                     }
@@ -618,6 +628,8 @@ namespace EverydaySPnlCountService
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkScrapWIPLog()" +
                     ex.Message + "\n\r");
                 writerLog.Flush();
+                writerLog.Close();
+                writerLog.Dispose();
             }
         }
 
@@ -742,11 +754,15 @@ namespace EverydaySPnlCountService
                 MySmtp.Send(SendMail);
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Send Mail OK!");
                 writerLog.Flush();
+                writerLog.Close();
+                writerLog.Dispose();
             }
             catch(Exception ex)
             {
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
                 writerLog.Flush();
+                writerLog.Close();
+                writerLog.Dispose();
             }
             finally
             {
