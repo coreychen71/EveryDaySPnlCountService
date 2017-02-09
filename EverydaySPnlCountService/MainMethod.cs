@@ -156,7 +156,6 @@ namespace EverydaySPnlCountService
                 writerResult.Dispose();
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
                 writerLog.Flush();
-                writerLog.Close();
                 SendMail("sm4@ewpcb.com.tw", "每日預估入庫SPnl數量統計", "spnlcount@ewpcb.com.tw",
                     DateTime.Now.ToString("yyyy-MM-dd") + " 每日預估入庫SPnl數量統計！",
                     "每日預估入庫SPnl數量統計，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -182,7 +181,6 @@ namespace EverydaySPnlCountService
                 DataTableToExcel(result, strSheet, SaveFile);
                 writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
                 writerLog.Flush();
-                writerLog.Close();
                 SendMail("sm4@ewpcb.com.tw", "每日待修設備清單", "equip@ewpcb.com.tw",
                     DateTime.Now.ToString("yyyy-MM-dd") + " 每日待修設備清單！",
                     "每日待修設備清單，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -329,8 +327,6 @@ namespace EverydaySPnlCountService
             {
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkDrillHole()" + ex.Message + "\n\r");
                 writerLog.Flush();
-                writerLog.Close();
-                writerLog.Dispose();
             }
         }
 
@@ -563,8 +559,6 @@ namespace EverydaySPnlCountService
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
                     ex.Message + "\n\r");
                 writerLog.Flush();
-                writerLog.Close();
-                writerLog.Dispose();
             }
         }
 
@@ -628,8 +622,6 @@ namespace EverydaySPnlCountService
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkScrapWIPLog()" +
                     ex.Message + "\n\r");
                 writerLog.Flush();
-                writerLog.Close();
-                writerLog.Dispose();
             }
         }
 
