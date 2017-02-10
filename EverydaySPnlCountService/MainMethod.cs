@@ -458,8 +458,6 @@ namespace EverydaySPnlCountService
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  GetEveryDayCustomerComplaint()" + 
                     ex.Message + "\n\r");
                 writerLog.Flush();
-                writerLog.Close();
-                writerLog.Dispose();
             }
         }
 
@@ -744,17 +742,13 @@ namespace EverydaySPnlCountService
             try
             {
                 MySmtp.Send(SendMail);
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Send Mail OK!");
+                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
                 writerLog.Flush();
-                writerLog.Close();
-                writerLog.Dispose();
             }
             catch(Exception ex)
             {
                 writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
                 writerLog.Flush();
-                writerLog.Close();
-                writerLog.Dispose();
             }
             finally
             {
