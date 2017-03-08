@@ -20,20 +20,14 @@ namespace EverydaySPnlCountService
         private double timerInterval = 60 * 1000;
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile="";
-        private string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + 
-            "\\EveryDaySPnlCountLog.txt";
         private StreamWriter writerResult;
-        private static StreamWriter writerLog;
 
         public MainMethod()
         {
             timer = new Timer();
             timer.Interval = timerInterval;
-            timer.AutoReset = false;
-            timer.Enabled = false;
+            timer.AutoReset = true;
             timer.Elapsed += Timer_Elapsed;
-            //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
-            writerLog = File.AppendText(LogPath);
             //SPnlCountRun();
             //GetEveryDayCustomerComplaint();
             //ChkDrillHole();
@@ -42,19 +36,34 @@ namespace EverydaySPnlCountService
             //ChkScrapWIPLog();
         }
 
+        public void Start()
+        {
+            timer.Start();
+        }
+
+        public void Stop()
+        {
+            timer.Stop();
+        }
+
         /// <summary>
         /// 寫入Log
         /// </summary>
         /// <param name="Msg">要寫入的訊息</param>
         public static void InsertLog(string Msg)
         {
+            string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
+                "\\EveryDaySPnlCountLog.txt";
+            StreamWriter writerLog;
+            //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
+            writerLog = File.AppendText(LogPath);
             writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + Msg + "\r\n");
             writerLog.Flush();
+            writerLog.Dispose();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            timer.Stop();
             //每日06: 30進行SPnl數統計(TXT)
             if (CheckTime("06:30:00", "06:30:59"))
             {
@@ -90,7 +99,6 @@ namespace EverydaySPnlCountService
             {
                 ChkPrintingInk();
             }
-            timer.Start();
         }
 
         /// <summary>
@@ -152,10 +160,7 @@ namespace EverydaySPnlCountService
                         result.Rows[i][1].ToString() + "\r\n");
                 }
                 writerResult.Flush();
-                writerResult.Close();
                 writerResult.Dispose();
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
-                writerLog.Flush();
                 SendMail("sm4@ewpcb.com.tw", "每日預估入庫SPnl數量統計", "spnlcount@ewpcb.com.tw",
                     DateTime.Now.ToString("yyyy-MM-dd") + " 每日預估入庫SPnl數量統計！",
                     "每日預估入庫SPnl數量統計，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -163,8 +168,7 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  SPnlCountRun()" + ex.Message + "\r\n");
-                writerLog.Flush();
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  SPnlCountRun()" + ex.Message + "\r\n");
             }
         }
 
@@ -179,8 +183,6 @@ namespace EverydaySPnlCountService
                 DataTable[] result = new DataTable[] { EquipMaintain.GetWaitMaintain() };
                 string[] strSheet = new string[] { "每日待修設備清單" };
                 DataTableToExcel(result, strSheet, SaveFile);
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "   Insert Temp OK!");
-                writerLog.Flush();
                 SendMail("sm4@ewpcb.com.tw", "每日待修設備清單", "equip@ewpcb.com.tw",
                     DateTime.Now.ToString("yyyy-MM-dd") + " 每日待修設備清單！",
                     "每日待修設備清單，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -188,8 +190,7 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  EquipMaintainRun()" + ex.Message + "\r\n");
-                writerLog.Flush();
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  EquipMaintainRun()" + ex.Message + "\r\n");
             }
         }
 
@@ -251,9 +252,8 @@ namespace EverydaySPnlCountService
                         }
                         catch (Exception ex)
                         {
-                            writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r" +
+                            InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r" +
                                 row["料號"].ToString().Trim() + "+" + chkrow[1].ToString() + "\r");
-                            writerLog.Flush();
                         }
                     }
                     if (Convert.ToInt32(row["數量"]) > chkCount)
@@ -316,7 +316,6 @@ namespace EverydaySPnlCountService
                 //}
                 #endregion
                 writerResult.Flush();
-                writerResult.Close();
                 writerResult.Dispose();
                 SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "checkhole@ewpcb.com.tw",
                     DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單！",
@@ -325,8 +324,7 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkDrillHole()" + ex.Message + "\n\r");
-                writerLog.Flush();
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkDrillHole()" + ex.Message + "\n\r");
             }
         }
 
@@ -403,7 +401,6 @@ namespace EverydaySPnlCountService
                     row[8].ToString().Trim()));
             }
             writerResult.Flush();
-            writerResult.Close();
             writerResult.Dispose();
             SendMail("sm4@ewpcb.com.tw", "製令單特殊油墨清單", "chkprintingink@ewpcb.com.tw",
                 DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令單特殊油墨清單！",
@@ -455,9 +452,8 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  GetEveryDayCustomerComplaint()" + 
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  GetEveryDayCustomerComplaint()" + 
                     ex.Message + "\n\r");
-                writerLog.Flush();
             }
         }
 
@@ -554,9 +550,8 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
                     ex.Message + "\n\r");
-                writerLog.Flush();
             }
         }
 
@@ -617,9 +612,8 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  ChkScrapWIPLog()" +
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkScrapWIPLog()" +
                     ex.Message + "\n\r");
-                writerLog.Flush();
             }
         }
 
@@ -688,8 +682,7 @@ namespace EverydaySPnlCountService
             }
             catch (Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
-                writerLog.Flush();
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
             }
             SaveFile.Close();
             return result;
@@ -742,13 +735,11 @@ namespace EverydaySPnlCountService
             try
             {
                 MySmtp.Send(SendMail);
-                writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
-                writerLog.Flush();
+                InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
             }
             catch(Exception ex)
             {
-                writerLog.WriteLine(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
-                writerLog.Flush();
+                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
             }
             finally
             {
@@ -759,17 +750,6 @@ namespace EverydaySPnlCountService
                     File.Delete(SaveFile);//刪除存放在系統個人暂存區的檔案
                 }
             }
-        }
-
-        public void Start()
-        {
-            timer.Enabled = true;
-        }
-
-        public void Stop()
-        {
-            timer.Enabled = false;
-            writerLog.Close();
         }
     }
 }
