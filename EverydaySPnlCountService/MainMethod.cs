@@ -52,8 +52,7 @@ namespace EverydaySPnlCountService
         /// <param name="Msg">要寫入的訊息</param>
         public static void InsertLog(string Msg)
         {
-            string LogPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
-                "\\EveryDaySPnlCountLog.txt";
+            string LogPath = @"C:\EveryDaySPnlCountService\EveryDaySPnlCountLog.txt";
             StreamWriter writerLog;
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
             writerLog = File.AppendText(LogPath);
@@ -697,57 +696,62 @@ namespace EverydaySPnlCountService
         /// <param name="sub">郵件主旨</param>
         /// <param name="body">郵件內容</param>
         /// <param name="att">郵件附件，若無附件可為null</param>
-        private void SendMail(string from,string display,string to,string sub,string body,string att)
+        private void SendMail(string from, string display, string to, string sub, string body, string att)
         {
             //建立寄件者地址與名稱
-            MailAddress ReceiverAddress = new MailAddress(from,display);
+            MailAddress ReceiverAddress = new MailAddress(from, display);
             //建立收件者地址
             MailAddress SendAddress = new MailAddress(to);
             //建立E-MAIL相關設定與訊息
-            MailMessage SendMail = new MailMessage(ReceiverAddress, SendAddress);
-            //Mail以HTML格式寄送
-            SendMail.IsBodyHtml = true;
+            using (MailMessage SendMail = new MailMessage(ReceiverAddress, SendAddress))
+            {
+                //Mail以HTML格式寄送
+                SendMail.IsBodyHtml = true;
 
-            /*
-            ##### 2016/12/08 #####
-            設定信件標頭走Base64傳輸，避免中文檔名附件變成亂碼
-            */
-            SendMail.Headers.Add("Content-Transfer-Encoding", "base64");
+                /*
+                ##### 2016/12/08 #####
+                設定信件標頭走Base64傳輸，避免中文檔名附件變成亂碼
+                */
+                SendMail.Headers.Add("Content-Transfer-Encoding", "base64");
 
-            //設定信件內容編碼為UTF8
-            SendMail.BodyEncoding = Encoding.UTF8;
-            //設定信件主旨編碼為UTF8
-            SendMail.SubjectEncoding = Encoding.UTF8;
-            //設定信件優先權為普通
-            SendMail.Priority = MailPriority.Normal;
-            SendMail.Subject = sub;//主旨
-            SendMail.Body = body;//內容
-            if (att != null)
-            {
-                //建立附加檔案
-                Attachment attachment = new Attachment(att);
-                SendMail.Attachments.Add(attachment);//加上附件檔案
-            }
-            //建立一個信件通訊並設定郵件主機地址與通訊埠號
-            SmtpClient MySmtp = new SmtpClient("ms1.ewpcb.com.tw", 25);
-            //設定寄件者的帳號與密碼
-            MySmtp.Credentials = new NetworkCredential("sm4", "sm4@ew");
-            try
-            {
-                MySmtp.Send(SendMail);
-                InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
-            }
-            catch(Exception ex)
-            {
-                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
-            }
-            finally
-            {
-                MySmtp = null;
-                SendMail.Dispose();
+                //設定信件主旨編碼為UTF8
+                SendMail.SubjectEncoding = Encoding.UTF8;
+
+                //設定信件內容編碼為UTF8
+                SendMail.BodyEncoding = Encoding.UTF8;
+                
+                //設定信件優先權為普通
+                SendMail.Priority = MailPriority.Normal;
+                SendMail.Subject = sub;//主旨
+                SendMail.Body = body;//內容
+
                 if (att != null)
                 {
-                    File.Delete(SaveFile);//刪除存放在系統個人暂存區的檔案
+                    //建立附加檔案
+                    Attachment attachment = new Attachment(att);
+                    SendMail.Attachments.Add(attachment);//加上附件檔案
+                }
+                //建立一個信件通訊並設定郵件主機地址與通訊埠號
+                using (SmtpClient MySmtp = new SmtpClient("ms1.ewpcb.com.tw", 25))
+                {
+                    //設定寄件者的帳號與密碼
+                    MySmtp.Credentials = new NetworkCredential("sm4", "sm4@ew");
+                    try
+                    {
+                        MySmtp.Send(SendMail);
+                        InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
+                    }
+                    catch (Exception ex)
+                    {
+                        InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
+                    }
+                    finally
+                    {
+                        if (att != null)
+                        {
+                            File.Delete(SaveFile);//刪除存放在系統個人暂存區的檔案
+                        }
+                    }
                 }
             }
         }
