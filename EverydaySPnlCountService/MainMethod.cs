@@ -160,15 +160,15 @@ namespace EverydaySPnlCountService
                 }
                 writerResult.Flush();
                 writerResult.Dispose();
-                SendMail("sm4@ewpcb.com.tw", "每日預估入庫SPnl數量統計", "spnlcount@ewpcb.com.tw",
-                    DateTime.Now.ToString("yyyy-MM-dd") + " 每日預估入庫SPnl數量統計！",
-                    "每日預估入庫SPnl數量統計，請詳閱附件。" + "<br/>" + "<br/>" +
-                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
             }
             catch (Exception ex)
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  SPnlCountRun()" + ex.Message + "\r\n");
             }
+            SendMail("sm4@ewpcb.com.tw", "每日預估入庫SPnl數量統計", "spnlcount@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd") + " 每日預估入庫SPnl數量統計！",
+                    "每日預估入庫SPnl數量統計，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
@@ -182,15 +182,15 @@ namespace EverydaySPnlCountService
                 DataTable[] result = new DataTable[] { EquipMaintain.GetWaitMaintain() };
                 string[] strSheet = new string[] { "每日待修設備清單" };
                 DataTableToExcel(result, strSheet, SaveFile);
-                SendMail("sm4@ewpcb.com.tw", "每日待修設備清單", "equip@ewpcb.com.tw",
-                    DateTime.Now.ToString("yyyy-MM-dd") + " 每日待修設備清單！",
-                    "每日待修設備清單，請詳閱附件。" + "<br/>" + "<br/>" +
-                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
             }
             catch (Exception ex)
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  EquipMaintainRun()" + ex.Message + "\r\n");
             }
+            SendMail("sm4@ewpcb.com.tw", "每日待修設備清單", "equip@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd") + " 每日待修設備清單！",
+                    "每日待修設備清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
@@ -316,15 +316,15 @@ namespace EverydaySPnlCountService
                 #endregion
                 writerResult.Flush();
                 writerResult.Dispose();
-                SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "checkhole@ewpcb.com.tw",
-                    DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單！",
-                    "鑽孔每日驗孔數量稽核清單，請詳閱附件。" + "<br/>" + "<br/>" +
-                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
             }
             catch (Exception ex)
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkDrillHole()" + ex.Message + "\n\r");
             }
+            SendMail("sm4@ewpcb.com.tw", "鑽孔每日驗孔數量稽核清單", "checkhole@ewpcb.com.tw",
+                    DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") + " 驗孔數量稽核清單！",
+                    "鑽孔每日驗孔數量稽核清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
@@ -444,16 +444,16 @@ namespace EverydaySPnlCountService
                 //}
                 //writerResult.Flush();
                 //writerResult.Close();
-                SendMail("sm4@ewpcb.com.tw", "品保待處理客訴通知(未逾期)", "qagroup@ewpcb.com.tw",
-                    DateTime.Now.ToString("yyyy-MM-dd") + " 品保待處理客訴通知(未逾期)",
-                    "品保待處理客訴通知(未逾期)，請詳閱附件。" + "<br/>" + "<br/>" +
-                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
             }
             catch (Exception ex)
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  GetEveryDayCustomerComplaint()" + 
                     ex.Message + "\n\r");
             }
+            SendMail("sm4@ewpcb.com.tw", "品保待處理客訴通知(未逾期)", "qagroup@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd") + " 品保待處理客訴通知(未逾期)",
+                    "品保待處理客訴通知(未逾期)，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
@@ -542,16 +542,16 @@ namespace EverydaySPnlCountService
                 DataTable[] resultTB = new DataTable[] { result };
                 string[] strSheet = new string[] { "製令稽核現帳預報廢清單" };
                 DataTableToExcel(resultTB, strSheet, SaveFile);
-                SendMail("sm4@ewpcb.com.tw", "每日製令稽核現帳預報廢清單", "chkissuescrapwip@ewpcb.com.tw",
-                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令稽核現帳預報廢清單",
-                    "製令稽核現帳預報廢清單，請詳閱附件。" + "<br/>" + "<br/>" +
-                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
             }
             catch (Exception ex)
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
                     ex.Message + "\n\r");
             }
+            SendMail("sm4@ewpcb.com.tw", "每日製令稽核現帳預報廢清單", "chkissuescrapwip@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令稽核現帳預報廢清單",
+                    "製令稽核現帳預報廢清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
@@ -604,16 +604,16 @@ namespace EverydaySPnlCountService
                 DataTable[] resultTB = new DataTable[] { result };
                 string[] strSheet = new string[] { "現帳預報廢未增帳清單" };
                 DataTableToExcel(resultTB, strSheet, SaveFile);
-                SendMail("sm4@ewpcb.com.tw", "現帳預報廢未增帳清單", "chkissuescrapwip@ewpcb.com.tw",
-                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 現帳預報廢未增帳清單",
-                    "現帳預報廢未增帳清單，請詳閱附件。" + "<br/>" + "<br/>" +
-                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
             }
             catch (Exception ex)
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkScrapWIPLog()" +
                     ex.Message + "\n\r");
             }
+            SendMail("sm4@ewpcb.com.tw", "現帳預報廢未增帳清單", "chkissuescrapwip@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 現帳預報廢未增帳清單",
+                    "現帳預報廢未增帳清單，請詳閱附件。" + "<br/>" + "<br/>" +
+                    "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
@@ -725,34 +725,52 @@ namespace EverydaySPnlCountService
                 SendMail.Subject = sub;//主旨
                 SendMail.Body = body;//內容
 
-                if (att != null)
+                if (!string.IsNullOrEmpty(att))
                 {
                     //建立附加檔案
                     Attachment attachment = new Attachment(att);
                     SendMail.Attachments.Add(attachment);//加上附件檔案
-                }
-                //建立一個信件通訊並設定郵件主機地址與通訊埠號
-                using (SmtpClient MySmtp = new SmtpClient("ms1.ewpcb.com.tw", 25))
-                {
-                    //設定寄件者的帳號與密碼
-                    MySmtp.Credentials = new NetworkCredential("sm4", "sm4@ew");
-                    try
+
+                    //建立一個信件通訊並設定郵件主機地址與通訊埠號
+                    using (SmtpClient MySmtp = new SmtpClient("ms1.ewpcb.com.tw", 25))
                     {
-                        MySmtp.Send(SendMail);
-                        InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
-                    }
-                    catch (Exception ex)
-                    {
-                        InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
-                    }
-                    finally
-                    {
-                        if (att != null)
+                        //設定寄件者的帳號與密碼
+                        MySmtp.Credentials = new NetworkCredential("sm4", "sm4@ew");
+                        try
                         {
-                            File.Delete(SaveFile);//刪除存放在系統個人暂存區的檔案
+                            MySmtp.Send(SendMail);
+                            InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
+                        }
+                        catch (Exception ex)
+                        {
+                            InsertLog(DateTime.Now.ToString(datetimeFormat) + " " + sub + " " + ex.Message + "\r\n");
+                        }
+                        finally
+                        {
+                            attachment.Dispose();
                         }
                     }
                 }
+                else
+                {
+                    using (SmtpClient MySmtp = new SmtpClient("ms1.ewpcb.com.tw", 25))
+                    {
+                        MySmtp.Credentials = new NetworkCredential("sm4", "sm4@ew");
+                        try
+                        {
+                            MySmtp.Send(SendMail);
+                            InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
+                        }
+                        catch (Exception ex)
+                        {
+                            InsertLog(DateTime.Now.ToString(datetimeFormat) + " " + sub + " " + ex.Message + "\r\n");
+                        }
+                    }
+                }
+            }
+            if (!string.IsNullOrEmpty(att))
+            {
+                File.Delete(SaveFile);//刪除存放在系統個人暂存區的檔案
             }
         }
     }
