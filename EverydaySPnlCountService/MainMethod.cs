@@ -57,6 +57,7 @@ namespace EverydaySPnlCountService
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
             writerLog = File.AppendText(LogPath);
             writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + Msg + "\r\n");
+            writerLog.Close();
             writerLog.Flush();
             writerLog.Dispose();
         }
@@ -124,6 +125,7 @@ namespace EverydaySPnlCountService
             //    writerLog.Flush();
             //}
             return result;
+            #region 原先一開始所使用的秒數差距判斷(已停用)
             //##### 原先一開始所使用的秒數差距判斷 #####//
             /*
             setTime = DateTime.Parse(settime);
@@ -137,6 +139,7 @@ namespace EverydaySPnlCountService
                 writerLog.Flush();
             }
             */
+            #endregion
         }
 
         /// <summary>
@@ -149,17 +152,20 @@ namespace EverydaySPnlCountService
                 SaveFile = Path.GetTempPath() + "SPnlCount.txt";
                 //### 2016/07/21 依總經理指示，再將起始日往前推1個月。 ###//
                 DateTime startDate = DateTime.Now.AddMonths(-1);
-                DataTable result = SPnlCount.SPnlCountRun(startDate);
-                //此方式為每次寫入時，均會直接覆蓋掉原本內容
-                writerResult = new StreamWriter(SaveFile);
-                writerResult.WriteLine("日期        SPnl數量" + "\r\n");
-                for (int i = 0; i < result.Rows.Count; i++)
+                using (DataTable result = SPnlCount.SPnlCountRun(startDate))
                 {
-                    writerResult.WriteLine(result.Rows[i][0].ToString() + "  " +
-                        result.Rows[i][1].ToString() + "\r\n");
+                    //此方式為每次寫入時，均會直接覆蓋掉原本內容
+                    writerResult = new StreamWriter(SaveFile);
+                    writerResult.WriteLine("日期        SPnl數量" + "\r\n");
+                    for (int i = 0; i < result.Rows.Count; i++)
+                    {
+                        writerResult.WriteLine(result.Rows[i][0].ToString() + "  " +
+                            result.Rows[i][1].ToString() + "\r\n");
+                    }
+                    writerResult.Close();
+                    writerResult.Flush();
+                    writerResult.Dispose();
                 }
-                writerResult.Flush();
-                writerResult.Dispose();
             }
             catch (Exception ex)
             {
@@ -208,61 +214,64 @@ namespace EverydaySPnlCountService
                     "驗孔數量稽核清單.txt";
                 writerResult = new StreamWriter(SaveFile);
                 writerResult.WriteLine("批號\t料號\t數量\t驗板數量\t驗板時間(起)\t驗板時間(迄)");
-                var ewTB = DFCheckHoleRecord.GetDFRecord(DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd"));
-                TXTtoTable loadingTxt = new TXTtoTable(srcPath +
-                    DateTime.Now.AddDays(decreaseDate).ToString("yyyyMMdd") + ".txt");
-                var chkTB = loadingTxt.GetTable();
-
-                #region 開始稽核數量
-                foreach (DataRow row in ewTB.Rows)
+                using (var ewTB = DFCheckHoleRecord.GetDFRecord(DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd")))
                 {
-                    var chkCount = 0;
-                    var StartTime = string.Empty;
-                    var EndTime = string.Empty;
-                    foreach (DataRow chkrow in chkTB.Rows)
+                    TXTtoTable loadingTxt = new TXTtoTable(srcPath +
+                        DateTime.Now.AddDays(decreaseDate).ToString("yyyyMMdd") + ".txt");
+                    var chkTB = loadingTxt.GetTable();
+
+                    #region 開始稽核數量
+                    foreach (DataRow row in ewTB.Rows)
                     {
-                        try
+                        var chkCount = 0;
+                        var StartTime = string.Empty;
+                        var EndTime = string.Empty;
+                        foreach (DataRow chkrow in chkTB.Rows)
                         {
-                            //chkrow[1]=料號、chkrow[3]=驗板開始時間、chkrow[5]=檢驗板數、chkrow[13]=驗板結束時間
-                            if (chkrow[1].ToString() != "")
+                            try
                             {
-                                //檢查料號是否有輸入不完全的
-                                if (chkrow[1].ToString().Length >= 11)
+                                //chkrow[1]=料號、chkrow[3]=驗板開始時間、chkrow[5]=檢驗板數、chkrow[13]=驗板結束時間
+                                if (chkrow[1].ToString() != "")
                                 {
-                                    if (row["料號"].ToString().Trim() ==
-                                        chkrow[1].ToString().ToUpper().Substring(0, 11))
+                                    //檢查料號是否有輸入不完全的
+                                    if (chkrow[1].ToString().Length >= 11)
                                     {
-                                        chkCount += Convert.ToInt32(chkrow[5]);
-                                        StartTime = chkrow[3].ToString();
-                                        EndTime = chkrow[13].ToString();
+                                        if (row["料號"].ToString().Trim() ==
+                                            chkrow[1].ToString().ToUpper().Substring(0, 11))
+                                        {
+                                            chkCount += Convert.ToInt32(chkrow[5]);
+                                            StartTime = chkrow[3].ToString();
+                                            EndTime = chkrow[13].ToString();
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    if (row["料號"].ToString().Trim().Substring(0, 8) ==
-                                        chkrow[1].ToString().ToUpper().Substring(0, 8))
+                                    else
                                     {
-                                        chkCount += Convert.ToInt32(chkrow[5]);
-                                        StartTime = chkrow[3].ToString();
-                                        EndTime = chkrow[13].ToString();
+                                        if (row["料號"].ToString().Trim().Substring(0, 8) ==
+                                            chkrow[1].ToString().ToUpper().Substring(0, 8))
+                                        {
+                                            chkCount += Convert.ToInt32(chkrow[5]);
+                                            StartTime = chkrow[3].ToString();
+                                            EndTime = chkrow[13].ToString();
+                                        }
                                     }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r" +
+                                    row["料號"].ToString().Trim() + "+" + chkrow[1].ToString() + "\r");
+                            }
                         }
-                        catch (Exception ex)
+                        if (Convert.ToInt32(row["數量"]) > chkCount)
                         {
-                            InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r" +
-                                row["料號"].ToString().Trim() + "+" + chkrow[1].ToString() + "\r");
+                            writerResult.WriteLine(row["批號"].ToString() + "\t" + row["料號"].ToString() + "\t" +
+                                row["數量"].ToString() + "\t" + Convert.ToString(chkCount) + "\t" + StartTime + "\t" +
+                                EndTime);
                         }
                     }
-                    if (Convert.ToInt32(row["數量"]) > chkCount)
-                    {
-                        writerResult.WriteLine(row["批號"].ToString() + "\t" + row["料號"].ToString() + "\t" +
-                            row["數量"].ToString() + "\t" + Convert.ToString(chkCount) + "\t" + StartTime + "\t" +
-                            EndTime);
-                    }
+                    #endregion
                 }
-                #endregion
+
                 #region 105/10/27 停用識別是否Ewproject有申報紀錄但卻未驗板的功能
                 //writerResult.WriteLine();
                 //writerResult.WriteLine();
@@ -314,6 +323,8 @@ namespace EverydaySPnlCountService
                 //    }
                 //}
                 #endregion
+
+                writerResult.Close();
                 writerResult.Flush();
                 writerResult.Dispose();
             }
@@ -399,8 +410,10 @@ namespace EverydaySPnlCountService
                     row[7].ToString().Trim(),
                     row[8].ToString().Trim()));
             }
+            writerResult.Close();
             writerResult.Flush();
             writerResult.Dispose();
+            result.Dispose();
             SendMail("sm4@ewpcb.com.tw", "製令單特殊油墨清單", "chkprintingink@ewpcb.com.tw",
                 DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令單特殊油墨清單！",
                 "製令單特殊油墨清單，請詳閱附件。" + "<br/>" + "<br/>" +
@@ -419,6 +432,7 @@ namespace EverydaySPnlCountService
                 DataTable[] result = new DataTable[] { ce.EveryDayCustomerComplaint() };
                 string[] strSheet = new string[] { "品保待處理客訴通知(未逾期)" };
                 DataTableToExcel(result, strSheet, SaveFile);
+                #region 輸出文字檔(已停用)
                 //輸出文字檔
                 //writerResult = new StreamWriter(SaveFile);
                 //writerResult.WriteLine("客戶別\t客訴日期\t週期\t料號\t客戶料號\t數量\t原因\t描述\t責任單位\t預計完成日\t" +
@@ -444,6 +458,7 @@ namespace EverydaySPnlCountService
                 //}
                 //writerResult.Flush();
                 //writerResult.Close();
+                #endregion
             }
             catch (Exception ex)
             {
@@ -542,6 +557,8 @@ namespace EverydaySPnlCountService
                 DataTable[] resultTB = new DataTable[] { result };
                 string[] strSheet = new string[] { "製令稽核現帳預報廢清單" };
                 DataTableToExcel(resultTB, strSheet, SaveFile);
+                issue.Dispose();
+                scrap.Dispose();
             }
             catch (Exception ex)
             {
@@ -609,6 +626,11 @@ namespace EverydaySPnlCountService
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkScrapWIPLog()" +
                     ex.Message + "\n\r");
+            }
+            finally
+            {
+                result.Dispose();
+                ScrapWIPLog.Dispose();
             }
             SendMail("sm4@ewpcb.com.tw", "現帳預報廢未增帳清單", "chkissuescrapwip@ewpcb.com.tw",
                     DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 現帳預報廢未增帳清單",
@@ -684,6 +706,8 @@ namespace EverydaySPnlCountService
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
             }
             SaveFile.Close();
+            SaveFile.Flush();
+            SaveFile.Dispose();
             return result;
         }
 
