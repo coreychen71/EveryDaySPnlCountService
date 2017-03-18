@@ -9,7 +9,7 @@ namespace EverydaySPnlCountService
         static string strCon = "server=EWNAS;database=ME;uid=me;pwd=2dae5na";
 
         /// <summary>
-        /// 取得Ewproject每日未結案客訴事項
+        /// 取得Ewproject每日未結案客訴事項(未逾期)
         /// </summary>
         /// <returns></returns>
         public DataTable EveryDayCustomerComplaint()

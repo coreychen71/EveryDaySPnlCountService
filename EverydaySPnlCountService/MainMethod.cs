@@ -20,7 +20,6 @@ namespace EverydaySPnlCountService
         private double timerInterval = 60 * 1000;
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile="";
-        private StreamWriter writerResult;
 
         public MainMethod()
         {
@@ -52,13 +51,18 @@ namespace EverydaySPnlCountService
         /// <param name="Msg">要寫入的訊息</param>
         public static void InsertLog(string Msg)
         {
+            if (!Directory.Exists(@"C:\EveryDaySPnlCountService"))
+            {
+                DirectoryInfo dir = new DirectoryInfo(@"C:\EveryDaySPnlCountService");
+                dir.Create();
+            }
             string LogPath = @"C:\EveryDaySPnlCountService\EveryDaySPnlCountLog.txt";
             StreamWriter writerLog;
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
             writerLog = File.AppendText(LogPath);
-            writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + Msg + "\r\n");
-            writerLog.Close();
+            writerLog.WriteLine(DateTime.Now.ToString("yyyy -MM-dd HH:mm:ss") + "  " + Msg + "\r\n");
             writerLog.Flush();
+            writerLog.Close();
             writerLog.Dispose();
         }
 
@@ -149,6 +153,7 @@ namespace EverydaySPnlCountService
         {
             try
             {
+                StreamWriter writerResult;
                 SaveFile = Path.GetTempPath() + "SPnlCount.txt";
                 //### 2016/07/21 依總經理指示，再將起始日往前推1個月。 ###//
                 DateTime startDate = DateTime.Now.AddMonths(-1);
@@ -162,8 +167,8 @@ namespace EverydaySPnlCountService
                         writerResult.WriteLine(result.Rows[i][0].ToString() + "  " +
                             result.Rows[i][1].ToString() + "\r\n");
                     }
-                    writerResult.Close();
                     writerResult.Flush();
+                    writerResult.Close();
                     writerResult.Dispose();
                 }
             }
@@ -210,6 +215,7 @@ namespace EverydaySPnlCountService
             var srcPath = @"E:\DailyReport4\";
             try
             {
+                StreamWriter writerResult;
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(decreaseDate).ToString("yyyy-MM-dd") +
                     "驗孔數量稽核清單.txt";
                 writerResult = new StreamWriter(SaveFile);
@@ -324,8 +330,8 @@ namespace EverydaySPnlCountService
                 //}
                 #endregion
 
-                writerResult.Close();
                 writerResult.Flush();
+                writerResult.Close();
                 writerResult.Dispose();
             }
             catch (Exception ex)
@@ -343,6 +349,7 @@ namespace EverydaySPnlCountService
         /// </summary>
         private void ChkPrintingInk()
         {
+            StreamWriter writerResult;
             SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + "製令單特殊油墨.txt";
             writerResult = new StreamWriter(SaveFile);
             var result = new DataTable();
@@ -410,8 +417,8 @@ namespace EverydaySPnlCountService
                     row[7].ToString().Trim(),
                     row[8].ToString().Trim()));
             }
-            writerResult.Close();
             writerResult.Flush();
+            writerResult.Close();
             writerResult.Dispose();
             result.Dispose();
             SendMail("sm4@ewpcb.com.tw", "製令單特殊油墨清單", "chkprintingink@ewpcb.com.tw",
@@ -705,8 +712,8 @@ namespace EverydaySPnlCountService
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
             }
-            SaveFile.Close();
             SaveFile.Flush();
+            SaveFile.Close();
             SaveFile.Dispose();
             return result;
         }

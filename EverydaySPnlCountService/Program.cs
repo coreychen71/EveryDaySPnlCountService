@@ -16,10 +16,7 @@ namespace EverydaySPnlCountService
             if (Environment.UserName == "SYSTEM")
             {
                 ServiceBase[] ServicesToRun;
-                ServicesToRun = new ServiceBase[]
-                {
-                new MainProgram()
-                };
+                ServicesToRun = new ServiceBase[] { new MainProgram() };
                 ServiceBase.Run(ServicesToRun);
             }
             else
