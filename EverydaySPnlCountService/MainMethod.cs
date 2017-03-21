@@ -157,7 +157,8 @@ namespace EverydaySPnlCountService
                 SaveFile = Path.GetTempPath() + "SPnlCount.txt";
                 //### 2016/07/21 依總經理指示，再將起始日往前推1個月。 ###//
                 DateTime startDate = DateTime.Now.AddMonths(-1);
-                using (DataTable result = SPnlCount.SPnlCountRun(startDate))
+                SPnlCount sc = new SPnlCount();
+                using (DataTable result = sc.SPnlCountRun(startDate))
                 {
                     //此方式為每次寫入時，均會直接覆蓋掉原本內容
                     writerResult = new StreamWriter(SaveFile);
