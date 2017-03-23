@@ -138,5 +138,197 @@ namespace EverydaySPnlCountService
             }
             return result;
         }
+
+        /// <summary>
+        /// 取得防焊顯影生產日報表稽核結果
+        /// </summary>
+        /// <param name="StartDate">起始時間</param>
+        /// <param name="EndDate">結束時間</param>
+        /// <returns></returns>
+        public DataTable ChkDevelopmentProductDailyReportLF(string StartDate, string EndDate)
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核防焊顯影生產日報表";
+                sqlcomm.Parameters.Add("@FromDate", SqlDbType.DateTime);
+                sqlcomm.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                sqlcomm.Parameters["@FromDate"].Value = StartDate;
+                sqlcomm.Parameters["@EndDate"].Value = EndDate;
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ChkDevelopmentProductDailyReportLF()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得乾膜顯影生產日報表稽核結果
+        /// </summary>
+        /// <param name="StartDate">起始時間</param>
+        /// <param name="EndDate">結束時間</param>
+        /// <returns></returns>
+        public DataTable ChkDevelopmentProductDailyReportFF(string StartDate, string EndDate)
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核乾膜顯影生產日報表";
+                sqlcomm.Parameters.Add("@FromDate", SqlDbType.DateTime);
+                sqlcomm.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                sqlcomm.Parameters["@FromDate"].Value = StartDate;
+                sqlcomm.Parameters["@EndDate"].Value = EndDate;
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ChkDevelopmentProductDailyReportFF()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得乾膜壓膜生產日報表稽核結果
+        /// </summary>
+        /// <param name="StartDate">起始時間</param>
+        /// <param name="EndDate">結束時間</param>
+        /// <returns></returns>
+        public DataTable Chk乾膜壓膜生產日報表(string StartDate, string EndDate)
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核乾膜壓膜生產日報表";
+                sqlcomm.Parameters.Add("@FromDate", SqlDbType.DateTime);
+                sqlcomm.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                sqlcomm.Parameters["@FromDate"].Value = StartDate;
+                sqlcomm.Parameters["@EndDate"].Value = EndDate;
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("Chk乾膜壓膜生產日報表()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得乾膜AOI檢查日報表稽核結果
+        /// </summary>
+        /// <param name="StartDate">起始時間</param>
+        /// <param name="EndDate">結束時間</param>
+        /// <returns></returns>
+        public DataTable Chk乾膜AOI檢查日報表(string StartDate, string EndDate)
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核乾膜AOI檢查日報表";
+                sqlcomm.Parameters.Add("@FromDate", SqlDbType.DateTime);
+                sqlcomm.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                sqlcomm.Parameters["@FromDate"].Value = StartDate;
+                sqlcomm.Parameters["@EndDate"].Value = EndDate;
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("Chk乾膜AOI檢查日報表()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得成型V-CUT生產量測日報表稽核結果
+        /// </summary>
+        /// <param name="StartDate">起始時間</param>
+        /// <param name="EndDate">結束時間</param>
+        /// <returns></returns>
+        public DataTable ChkVCutProductCheckRepay(string StartDate, string EndDate)
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核成型VCUT生產量測日報表";
+                sqlcomm.Parameters.Add("@FromDate", SqlDbType.DateTime);
+                sqlcomm.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                sqlcomm.Parameters["@FromDate"].Value = StartDate;
+                sqlcomm.Parameters["@EndDate"].Value = EndDate;
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ChkVCutProductCheckRepay()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得壓合PP裁切自主檢查日報表稽核結果
+        /// </summary>
+        /// <param name="StartDate">起始時間</param>
+        /// <param name="EndDate">結束時間</param>
+        /// <returns></returns>
+        public DataTable ChkPPCutChkReport(string StartDate, string EndDate)
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核壓合PP裁切自主檢查日報表";
+                sqlcomm.Parameters.Add("@FromDate", SqlDbType.DateTime);
+                sqlcomm.Parameters.Add("@EndDate", SqlDbType.DateTime);
+                sqlcomm.Parameters["@FromDate"].Value = StartDate;
+                sqlcomm.Parameters["@EndDate"].Value = EndDate;
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ChkPPCutChkReport()-" + ex.Message);
+                }
+            }
+            return result;
+        }
     }
 }
