@@ -662,221 +662,227 @@ namespace EverydaySPnlCountService
             var fromDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd 08:10:00");
             var endDate = DateTime.Now.ToString("yyyy-MM-dd 08:10:00");
             var strResult = string.Empty;
-            
-            #region 防焊顯影
-            var ResultLF = ewnas.ChkDevelopmentProductDailyReportLF(fromDate, endDate);
-            strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
-            strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
-                "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
-            if (ResultLF.Rows.Count != 0)
+            try
             {
-                foreach (DataRow row in ResultLF.Rows)
+                #region 防焊顯影
+                var ResultLF = ewnas.ChkDevelopmentProductDailyReportLF(fromDate, endDate);
+                strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
+                strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
+                    "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
+                if (ResultLF.Rows.Count != 0)
                 {
-                    strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
-                            row["Item"].ToString(),
-                            row["empname"].ToString(),
-                            row["departname"].ToString(),
-                            row["lotnum"].ToString(),
-                            row["partnum"].ToString(),
-                            row["layername"].ToString(),
-                            row["process"].ToString(),
-                            row["machineno"].ToString(),
-                            row["workqnty"].ToString(),
-                            row["starttime"].ToString(),
-                            row["endtime"].ToString());
+                    foreach (DataRow row in ResultLF.Rows)
+                    {
+                        strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
+                                row["Item"].ToString(),
+                                row["empname"].ToString(),
+                                row["departname"].ToString(),
+                                row["lotnum"].ToString(),
+                                row["partnum"].ToString(),
+                                row["layername"].ToString(),
+                                row["process"].ToString(),
+                                row["machineno"].ToString(),
+                                row["workqnty"].ToString(),
+                                row["starttime"].ToString(),
+                                row["endtime"].ToString());
+                    }
+                    strResult += "<p>上述筆數為Ewproject有申報但輔助系統防焊顯影生產日報查無的紀錄！<p>" +
+                        "以上為防焊顯影生產日報漏申報稽核結果。<p>";
                 }
-                strResult += "<p>上述筆數為Ewproject有申報但輔助系統防焊顯影生產日報查無的紀錄！<p>" +
-                    "以上為防焊顯影生產日報漏申報稽核結果。<p>";
-            }
-            else
-            {
-                strResult += "<br>防焊顯影生產日報查無漏申報紀錄！<p>";
-            }
-            ResultLF.Dispose();
-            SendMail("sm4@ewpcb.com.tw", "防焊顯影生產日報稽核結果", "chkdeclarelf@ewpcb.com.tw",
-                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 防焊顯影生產日報稽核結果！",
-                "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
-            #endregion
+                else
+                {
+                    strResult += "<br>防焊顯影生產日報查無漏申報紀錄！<p>";
+                }
+                ResultLF.Dispose();
+                SendMail("sm4@ewpcb.com.tw", "防焊顯影生產日報稽核結果", "chkdeclarelf@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 防焊顯影生產日報稽核結果！",
+                    "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                #endregion
 
-            #region 乾膜顯影
-            var ResultFF = ewnas.ChkDevelopmentProductDailyReportFF(fromDate, endDate);
-            strResult = string.Empty;
-            strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
-            strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
-                "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
-            if (ResultFF.Rows.Count != 0)
-            {
-                foreach (DataRow row in ResultFF.Rows)
+                #region 乾膜顯影
+                var ResultFF = ewnas.ChkDevelopmentProductDailyReportFF(fromDate, endDate);
+                strResult = string.Empty;
+                strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
+                strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
+                    "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
+                if (ResultFF.Rows.Count != 0)
                 {
-                    strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
-                            row["Item"].ToString(),
-                            row["empname"].ToString(),
-                            row["departname"].ToString(),
-                            row["lotnum"].ToString(),
-                            row["partnum"].ToString(),
-                            row["layername"].ToString(),
-                            row["process"].ToString(),
-                            row["machineno"].ToString(),
-                            row["workqnty"].ToString(),
-                            row["starttime"].ToString(),
-                            row["endtime"].ToString());
+                    foreach (DataRow row in ResultFF.Rows)
+                    {
+                        strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
+                                row["Item"].ToString(),
+                                row["empname"].ToString(),
+                                row["departname"].ToString(),
+                                row["lotnum"].ToString(),
+                                row["partnum"].ToString(),
+                                row["layername"].ToString(),
+                                row["process"].ToString(),
+                                row["machineno"].ToString(),
+                                row["workqnty"].ToString(),
+                                row["starttime"].ToString(),
+                                row["endtime"].ToString());
+                    }
+                    strResult += "<p>上述筆數為Ewproject有申報但輔助系統乾膜顯影生產日報查無的紀錄！<p>" +
+                        "以上為乾膜顯影生產日報漏申報稽核結果。<p>";
                 }
-                strResult += "<p>上述筆數為Ewproject有申報但輔助系統乾膜顯影生產日報查無的紀錄！<p>" +
-                    "以上為乾膜顯影生產日報漏申報稽核結果。<p>";
-            }
-            else
-            {
-                strResult += "<br>乾膜顯影生產日報查無漏申報紀錄！<p>";
-            }
-            ResultFF.Dispose();
-            SendMail("sm4@ewpcb.com.tw", "乾膜顯影生產日報稽核結果", "chkdeclareff@ewpcb.com.tw",
-                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 乾膜顯影生產日報稽核結果！",
-                "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
-            #endregion
+                else
+                {
+                    strResult += "<br>乾膜顯影生產日報查無漏申報紀錄！<p>";
+                }
+                ResultFF.Dispose();
+                SendMail("sm4@ewpcb.com.tw", "乾膜顯影生產日報稽核結果", "chkdeclareff@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 乾膜顯影生產日報稽核結果！",
+                    "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                #endregion
 
-            #region 乾膜壓膜
-            var Result壓膜 = ewnas.Chk乾膜壓膜生產日報表(fromDate, endDate);
-            strResult = string.Empty;
-            strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
-            strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
-                "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
-            if (Result壓膜.Rows.Count != 0)
-            {
-                foreach (DataRow row in Result壓膜.Rows)
+                #region 乾膜壓膜
+                var Result壓膜 = ewnas.Chk乾膜壓膜生產日報表(fromDate, endDate);
+                strResult = string.Empty;
+                strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
+                strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
+                    "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
+                if (Result壓膜.Rows.Count != 0)
                 {
-                    strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
-                            row["Item"].ToString(),
-                            row["empname"].ToString(),
-                            row["departname"].ToString(),
-                            row["lotnum"].ToString(),
-                            row["partnum"].ToString(),
-                            row["layername"].ToString(),
-                            row["process"].ToString(),
-                            row["machineno"].ToString(),
-                            row["workqnty"].ToString(),
-                            row["starttime"].ToString(),
-                            row["endtime"].ToString());
+                    foreach (DataRow row in Result壓膜.Rows)
+                    {
+                        strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
+                                row["Item"].ToString(),
+                                row["empname"].ToString(),
+                                row["departname"].ToString(),
+                                row["lotnum"].ToString(),
+                                row["partnum"].ToString(),
+                                row["layername"].ToString(),
+                                row["process"].ToString(),
+                                row["machineno"].ToString(),
+                                row["workqnty"].ToString(),
+                                row["starttime"].ToString(),
+                                row["endtime"].ToString());
+                    }
+                    strResult += "<p>上述筆數為Ewproject有申報但輔助系統乾膜壓膜日報查無的紀錄！<p>" +
+                        "以上為乾膜壓膜生產日報漏申報稽核結果。<p>";
                 }
-                strResult += "<p>上述筆數為Ewproject有申報但輔助系統乾膜壓膜日報查無的紀錄！<p>" +
-                    "以上為乾膜壓膜生產日報漏申報稽核結果。<p>";
-            }
-            else
-            {
-                strResult += "<br>乾膜壓膜生產日報查無漏申報紀錄！<p>";
-            }
-            Result壓膜.Dispose();
-            SendMail("sm4@ewpcb.com.tw", "乾膜壓膜生產日報稽核結果", "chkdeclareff@ewpcb.com.tw",
-                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 乾膜壓膜生產日報稽核結果！",
-                "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
-            #endregion
-            
-            #region 乾膜AOI
-            var ResultAOI = ewnas.Chk乾膜AOI檢查日報表(fromDate, endDate);
-            strResult = string.Empty;
-            strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
-            strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
-                "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
-            if (ResultAOI.Rows.Count != 0)
-            {
-                foreach (DataRow row in ResultAOI.Rows)
+                else
                 {
-                    strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
-                            row["Item"].ToString(),
-                            row["empname"].ToString(),
-                            row["departname"].ToString(),
-                            row["lotnum"].ToString(),
-                            row["partnum"].ToString(),
-                            row["layername"].ToString(),
-                            row["process"].ToString(),
-                            row["machineno"].ToString(),
-                            row["workqnty"].ToString(),
-                            row["starttime"].ToString(),
-                            row["endtime"].ToString());
+                    strResult += "<br>乾膜壓膜生產日報查無漏申報紀錄！<p>";
                 }
-                strResult += "<p>上述筆數為Ewproject有申報但輔助系統乾膜AOI檢查日報查無的紀錄！<p>" +
-                    "以上為乾膜AOI檢查日報漏申報稽核結果。<p>";
-            }
-            else
-            {
-                strResult += "<br>乾膜AOI檢查日報查無漏申報紀錄！<p>";
-            }
-            ResultAOI.Dispose();
-            SendMail("sm4@ewpcb.com.tw", "乾膜AOI檢查日報稽核結果", "chkdeclareff@ewpcb.com.tw",
-                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 乾膜AOI檢查日報稽核結果！",
-                "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
-            #endregion
-            
-            #region 成型V-CUT生產量測
-            var ResultVCUT = ewnas.ChkVCutProductCheckRepay(fromDate, endDate);
-            strResult = string.Empty;
-            strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
-            strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
-                "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
-            if (ResultVCUT.Rows.Count != 0)
-            {
-                foreach (DataRow row in ResultVCUT.Rows)
+                Result壓膜.Dispose();
+                SendMail("sm4@ewpcb.com.tw", "乾膜壓膜生產日報稽核結果", "chkdeclareff@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 乾膜壓膜生產日報稽核結果！",
+                    "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                #endregion
+
+                #region 乾膜AOI
+                var ResultAOI = ewnas.Chk乾膜AOI檢查日報表(fromDate, endDate);
+                strResult = string.Empty;
+                strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
+                strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
+                    "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
+                if (ResultAOI.Rows.Count != 0)
                 {
-                    strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
-                            row["Item"].ToString(),
-                            row["empname"].ToString(),
-                            row["departname"].ToString(),
-                            row["lotnum"].ToString(),
-                            row["partnum"].ToString(),
-                            row["layername"].ToString(),
-                            row["process"].ToString(),
-                            row["machineno"].ToString(),
-                            row["workqnty"].ToString(),
-                            row["starttime"].ToString(),
-                            row["endtime"].ToString());
+                    foreach (DataRow row in ResultAOI.Rows)
+                    {
+                        strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
+                                row["Item"].ToString(),
+                                row["empname"].ToString(),
+                                row["departname"].ToString(),
+                                row["lotnum"].ToString(),
+                                row["partnum"].ToString(),
+                                row["layername"].ToString(),
+                                row["process"].ToString(),
+                                row["machineno"].ToString(),
+                                row["workqnty"].ToString(),
+                                row["starttime"].ToString(),
+                                row["endtime"].ToString());
+                    }
+                    strResult += "<p>上述筆數為Ewproject有申報但輔助系統乾膜AOI檢查日報查無的紀錄！<p>" +
+                        "以上為乾膜AOI檢查日報漏申報稽核結果。<p>";
                 }
-                strResult += "<p>上述筆數為Ewproject有申報但輔助系統成型V-CUT生產/量測日報查無的紀錄！<p>" +
-                    "以上為成型V-CUT生產/量測日報漏申報稽核結果。<p>";
-            }
-            else
-            {
-                strResult += "<br>成型V-CUT生產/量測日報查無漏申報紀錄！<p>";
-            }
-            ResultVCUT.Dispose();
-            SendMail("sm4@ewpcb.com.tw", "成型V-CUT生產/量測日報稽核結果", "chkdeclarecf@ewpcb.com.tw",
-                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 成型V-CUT生產/量測日報稽核結果！",
-                "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
-            #endregion
-            
-            #region 壓合PP裁切自主檢查
-            var ResultPPCUT = ewnas.ChkPPCutChkReport(fromDate, endDate);
-            strResult = string.Empty;
-            strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
-            strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
-                "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
-            if (ResultPPCUT.Rows.Count != 0)
-            {
-                foreach (DataRow row in ResultPPCUT.Rows)
+                else
                 {
-                    strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
-                            row["Item"].ToString(),
-                            row["empname"].ToString(),
-                            row["departname"].ToString(),
-                            row["lotnum"].ToString(),
-                            row["partnum"].ToString(),
-                            row["layername"].ToString(),
-                            row["process"].ToString(),
-                            row["machineno"].ToString(),
-                            row["workqnty"].ToString(),
-                            row["starttime"].ToString(),
-                            row["endtime"].ToString());
+                    strResult += "<br>乾膜AOI檢查日報查無漏申報紀錄！<p>";
                 }
-                strResult += "<p>上述筆數為Ewproject有申報但輔助系統壓合PP裁切自主檢查日報查無的紀錄！<p>" +
-                    "以上為壓合PP裁切自主檢查日報漏申報稽核結果。<p>";
+                ResultAOI.Dispose();
+                SendMail("sm4@ewpcb.com.tw", "乾膜AOI檢查日報稽核結果", "chkdeclareff@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 乾膜AOI檢查日報稽核結果！",
+                    "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                #endregion
+
+                #region 成型V-CUT生產量測
+                var ResultVCUT = ewnas.ChkVCutProductCheckRepay(fromDate, endDate);
+                strResult = string.Empty;
+                strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
+                strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
+                    "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
+                if (ResultVCUT.Rows.Count != 0)
+                {
+                    foreach (DataRow row in ResultVCUT.Rows)
+                    {
+                        strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
+                                row["Item"].ToString(),
+                                row["empname"].ToString(),
+                                row["departname"].ToString(),
+                                row["lotnum"].ToString(),
+                                row["partnum"].ToString(),
+                                row["layername"].ToString(),
+                                row["process"].ToString(),
+                                row["machineno"].ToString(),
+                                row["workqnty"].ToString(),
+                                row["starttime"].ToString(),
+                                row["endtime"].ToString());
+                    }
+                    strResult += "<p>上述筆數為Ewproject有申報但輔助系統成型V-CUT生產/量測日報查無的紀錄！<p>" +
+                        "以上為成型V-CUT生產/量測日報漏申報稽核結果。<p>";
+                }
+                else
+                {
+                    strResult += "<br>成型V-CUT生產/量測日報查無漏申報紀錄！<p>";
+                }
+                ResultVCUT.Dispose();
+                SendMail("sm4@ewpcb.com.tw", "成型V-CUT生產/量測日報稽核結果", "chkdeclarecf@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 成型V-CUT生產/量測日報稽核結果！",
+                    "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                #endregion
+
+                #region 壓合PP裁切自主檢查
+                var ResultPPCUT = ewnas.ChkPPCutChkReport(fromDate, endDate);
+                strResult = string.Empty;
+                strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
+                strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
+                    "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
+                if (ResultPPCUT.Rows.Count != 0)
+                {
+                    foreach (DataRow row in ResultPPCUT.Rows)
+                    {
+                        strResult += string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}<br>",
+                                row["Item"].ToString(),
+                                row["empname"].ToString(),
+                                row["departname"].ToString(),
+                                row["lotnum"].ToString(),
+                                row["partnum"].ToString(),
+                                row["layername"].ToString(),
+                                row["process"].ToString(),
+                                row["machineno"].ToString(),
+                                row["workqnty"].ToString(),
+                                row["starttime"].ToString(),
+                                row["endtime"].ToString());
+                    }
+                    strResult += "<p>上述筆數為Ewproject有申報但輔助系統壓合PP裁切自主檢查日報查無的紀錄！<p>" +
+                        "以上為壓合PP裁切自主檢查日報漏申報稽核結果。<p>";
+                }
+                else
+                {
+                    strResult += "<br>壓合PP裁切自主檢查日報查無漏申報紀錄！<p>";
+                }
+                ResultPPCUT.Dispose();
+                SendMail("sm4@ewpcb.com.tw", "壓合PP裁切自主檢查日報稽核結果", "chkdeclareel@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 壓合PP裁切自主檢查日報稽核結果！",
+                    "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                #endregion
             }
-            else
+            catch (Exception ex)
             {
-                strResult += "<br>壓合PP裁切自主檢查日報查無漏申報紀錄！<p>";
+                InsertLog("ChkProductDailyReport() " + ex.Message);
             }
-            ResultPPCUT.Dispose();
-            SendMail("sm4@ewpcb.com.tw", "壓合PP裁切自主檢查日報稽核結果", "chkdeclareel@ewpcb.com.tw",
-                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 壓合PP裁切自主檢查日報稽核結果！",
-                "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
-            #endregion
         }
 
         /// <summary>
@@ -1004,7 +1010,7 @@ namespace EverydaySPnlCountService
                         try
                         {
                             MySmtp.Send(SendMail);
-                            InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
+                            InsertLog(sub + "   Send Mail OK!");
                         }
                         catch (Exception ex)
                         {
@@ -1024,11 +1030,11 @@ namespace EverydaySPnlCountService
                         try
                         {
                             MySmtp.Send(SendMail);
-                            InsertLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + sub + "   Send Mail OK!");
+                            InsertLog(sub + "   Send Mail OK!");
                         }
                         catch (Exception ex)
                         {
-                            InsertLog(DateTime.Now.ToString(datetimeFormat) + " " + sub + " " + ex.Message + "\r\n");
+                            InsertLog(sub + " " + ex.Message + "\r\n");
                         }
                     }
                 }
