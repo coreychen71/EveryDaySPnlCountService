@@ -662,10 +662,12 @@ namespace EverydaySPnlCountService
             var fromDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd 08:10:00");
             var endDate = DateTime.Now.ToString("yyyy-MM-dd 08:10:00");
             var strResult = string.Empty;
+            var xlsResult = new DataTable[6];
             try
             {
                 #region 防焊顯影
                 var ResultLF = ewnas.ChkDevelopmentProductDailyReportLF(fromDate, endDate);
+                xlsResult[0] = ResultLF.Copy();
                 strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
                 strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
                     "項次", "姓名", "部門", "批號", "料號", "層別", "工序", "機台", "數量", "開始時間", "結束時間");
@@ -701,6 +703,7 @@ namespace EverydaySPnlCountService
 
                 #region 乾膜顯影
                 var ResultFF = ewnas.ChkDevelopmentProductDailyReportFF(fromDate, endDate);
+                xlsResult[1]=ResultFF.Copy();
                 strResult = string.Empty;
                 strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
                 strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
@@ -737,6 +740,7 @@ namespace EverydaySPnlCountService
 
                 #region 乾膜壓膜
                 var Result壓膜 = ewnas.Chk乾膜壓膜生產日報表(fromDate, endDate);
+                xlsResult[2]=Result壓膜.Copy();
                 strResult = string.Empty;
                 strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
                 strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
@@ -773,6 +777,7 @@ namespace EverydaySPnlCountService
 
                 #region 乾膜AOI
                 var ResultAOI = ewnas.Chk乾膜AOI檢查日報表(fromDate, endDate);
+                xlsResult[3]=ResultAOI.Copy();
                 strResult = string.Empty;
                 strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
                 strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
@@ -809,6 +814,7 @@ namespace EverydaySPnlCountService
 
                 #region 成型V-CUT生產量測
                 var ResultVCUT = ewnas.ChkVCutProductCheckRepay(fromDate, endDate);
+                xlsResult[4]=ResultVCUT.Copy();
                 strResult = string.Empty;
                 strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
                 strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
@@ -845,6 +851,7 @@ namespace EverydaySPnlCountService
 
                 #region 壓合PP裁切自主檢查
                 var ResultPPCUT = ewnas.ChkPPCutChkReport(fromDate, endDate);
+                xlsResult[5]=ResultPPCUT.Copy();
                 strResult = string.Empty;
                 strResult += string.Format("稽核區間：{0} ~ {1}<p>", fromDate, endDate);
                 strResult += string.Format("{0}\t{1}\t{2}\t{3}\t\t{4}\t\t{5}\t{6}\t{7}\t{8}\t{9}\t\t\t{10}<br>",
@@ -878,6 +885,17 @@ namespace EverydaySPnlCountService
                     DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 壓合PP裁切自主檢查日報稽核結果！",
                     "<pre>" + strResult + "</pre>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
                 #endregion
+
+                #region 單獨滙整成一份EXCEL檔，SEND給巫經理
+                SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
+                    "輔助系統表單稽核清單.xls";
+                var sheetName = new string[] { "防焊顯影", "乾膜顯影", "乾膜壓膜", "乾膜AOI", "成型V-CUT", "壓合PP裁切" };
+                DataTableToExcel(xlsResult, sheetName, SaveFile);
+                SendMail("sm4@ewpcb.com.tw", "輔助系統表單稽核結果", "ewvm@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 輔助系統表單稽核結果！",
+                    "輔助系統表單稽核結果，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+                #endregion
+
             }
             catch (Exception ex)
             {
@@ -912,7 +930,7 @@ namespace EverydaySPnlCountService
             csCell.SetFont(fontCell);
             for (int AllSheet = 0; AllSheet < Source.Length; AllSheet++)
             {
-                if (Source[AllSheet].TableName != string.Empty)
+                if (!string.IsNullOrEmpty(SheetName[AllSheet]))
                 {
                     Sheet = workbook.CreateSheet(SheetName[AllSheet]);
                 }
