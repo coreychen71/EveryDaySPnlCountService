@@ -887,8 +887,14 @@ namespace EverydaySPnlCountService
                 #endregion
 
                 #region 單獨滙整成一份EXCEL檔，SEND給巫經理
+                //xlsResult[0] = ewnas.ChkDevelopmentProductDailyReportLF(fromDate, endDate);
+                //xlsResult[1] = ewnas.ChkDevelopmentProductDailyReportFF(fromDate, endDate);
+                //xlsResult[2] = ewnas.Chk乾膜壓膜生產日報表(fromDate, endDate);
+                //xlsResult[3] = ewnas.Chk乾膜AOI檢查日報表(fromDate, endDate);
+                //xlsResult[4] = ewnas.ChkVCutProductCheckRepay(fromDate, endDate);
+                //xlsResult[5] = ewnas.ChkPPCutChkReport(fromDate, endDate);
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
-                    "輔助系統表單稽核清單.xls";
+                    ".xls";
                 var sheetName = new string[] { "防焊顯影", "乾膜顯影", "乾膜壓膜", "乾膜AOI", "成型V-CUT", "壓合PP裁切" };
                 DataTableToExcel(xlsResult, sheetName, SaveFile);
                 SendMail("sm4@ewpcb.com.tw", "輔助系統表單稽核結果", "ewvm@ewpcb.com.tw",
