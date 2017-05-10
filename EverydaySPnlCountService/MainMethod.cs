@@ -34,6 +34,7 @@ namespace EverydaySPnlCountService
             //ChkPrintingInk();
             //ChkIssueAndScrapWIP();
             //ChkScrapWIPLog();
+            //ChkIQC每日量測申報紀錄();
         }
 
         public void Start()
@@ -74,10 +75,11 @@ namespace EverydaySPnlCountService
             {
                 SPnlCountRun();
             }
-            //每日07:00進行品保客訴待處理(未逾期)清單(Excel)
+            //每日07:00進行品保客訴待處理(未逾期)清單(Excel)、IQC每日量測申報稽核
             else if (CheckTime("07:00:00", "07:00:59"))
             {
                 GetEveryDayCustomerComplaint();
+                ChkIQC每日量測申報紀錄();
             }
             //每日08:15進行輔助系統生產日報表稽核
             else if (CheckTime("08:15:00", "08:15:59"))
@@ -907,6 +909,24 @@ namespace EverydaySPnlCountService
             {
                 InsertLog("ChkProductDailyReport() " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// 稽核每日品保IQC檢驗申報表單申報記錄
+        /// </summary>
+        private void ChkIQC每日量測申報紀錄()
+        {
+            ConnEWNAS ewnas = new ConnEWNAS();
+            var Copper = ewnas.ChkIQC一二銅量測申報();
+            var Slice = ewnas.ChkIQC切片量測申報();
+            var xlsResult = new DataTable[] { Copper, Slice };
+            SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
+                    ".xls";
+            var sheetName = new string[] { "一、二銅", "切片" };
+            DataTableToExcel(xlsResult, sheetName, SaveFile);
+            SendMail("sm4@ewpcb.com.tw", "輔助系統IQC表單稽核結果", "chkdeclareqc@ewpcb.com.tw",
+                DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 輔助系統IQC表單稽核結果！",
+                "輔助系統IQC表單稽核結果，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
