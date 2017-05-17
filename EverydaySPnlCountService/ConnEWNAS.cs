@@ -382,5 +382,57 @@ namespace EverydaySPnlCountService
             }
             return result;
         }
+
+        /// <summary>
+        /// 取得品保基板銅箔申報稽核結果
+        /// </summary>
+        /// <returns></returns>
+        public DataTable ChkIQC基板銅箔量測申報()
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核品保基板銅箔量測申報";
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ChkIQC基板銅箔量測申報()-" + ex.Message);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 取得品保磨刷減銅申報稽核結果
+        /// </summary>
+        /// <returns></returns>
+        public DataTable ChkIQC磨刷減銅量測申報()
+        {
+            var result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon);
+                sqlcomm.CommandType = CommandType.StoredProcedure;
+                sqlcomm.CommandText = "稽核品保磨刷減銅量測申報";
+                try
+                {
+                    sqlcon.Open();
+                    SqlDataReader reader = sqlcomm.ExecuteReader();
+                    result.Load(reader);
+                }
+                catch (Exception ex)
+                {
+                    MainMethod.InsertLog("ChkIQC磨刷減銅測申報()-" + ex.Message);
+                }
+            }
+            return result;
+        }
     }
 }

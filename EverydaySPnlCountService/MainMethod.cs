@@ -571,7 +571,7 @@ namespace EverydaySPnlCountService
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
                     "清單.xls";
                 DataTable[] resultTB = new DataTable[] { result };
-                string[] strSheet = new string[] { "製令稽核現帳預報廢清單" };
+                string[] strSheet = new string[] { "製令稽核防焊現帳預報廢清單" };
                 DataTableToExcel(resultTB, strSheet, SaveFile);
                 issue.Dispose();
                 scrap.Dispose();
@@ -581,14 +581,14 @@ namespace EverydaySPnlCountService
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  ChkIssueAndScrapWIP()" + 
                     ex.Message + "\n\r");
             }
-            SendMail("sm4@ewpcb.com.tw", "每日製令稽核現帳預報廢清單", "chkissuescrapwip@ewpcb.com.tw",
-                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令稽核現帳預報廢清單",
-                    "製令稽核現帳預報廢清單，請詳閱附件。" + "<br/>" + "<br/>" +
+            SendMail("sm4@ewpcb.com.tw", "每日製令稽核防焊現帳預報廢清單", "chkissuescrapwip@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 製令稽核防焊現帳預報廢清單",
+                    "製令稽核防焊現帳預報廢清單，請詳閱附件。" + "<br/>" + "<br/>" +
                     "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
-        /// 檢查預報廢現帳LOG裡的製令單日期是否已達到二天
+        /// 檢查防焊預報廢現帳LOG裡的製令單日期是否已達到二天
         /// 2天內未增帳就發信通知，已增帳就從LOG裡移除
         /// </summary>
         private void ChkScrapWIPLog()
@@ -635,7 +635,7 @@ namespace EverydaySPnlCountService
                 SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
                     "清單.xls";
                 DataTable[] resultTB = new DataTable[] { result };
-                string[] strSheet = new string[] { "現帳預報廢未增帳清單" };
+                string[] strSheet = new string[] { "防焊現帳預報廢未增帳清單" };
                 DataTableToExcel(resultTB, strSheet, SaveFile);
             }
             catch (Exception ex)
@@ -648,9 +648,9 @@ namespace EverydaySPnlCountService
                 result.Dispose();
                 ScrapWIPLog.Dispose();
             }
-            SendMail("sm4@ewpcb.com.tw", "現帳預報廢未增帳清單", "chkissuescrapwip@ewpcb.com.tw",
-                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 現帳預報廢未增帳清單",
-                    "現帳預報廢未增帳清單，請詳閱附件。" + "<br/>" + "<br/>" +
+            SendMail("sm4@ewpcb.com.tw", "防焊現帳預報廢未增帳清單", "chkissuescrapwip@ewpcb.com.tw",
+                    DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 防焊現帳預報廢未增帳清單",
+                    "防焊現帳預報廢未增帳清單，請詳閱附件。" + "<br/>" + "<br/>" +
                     "-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
@@ -919,10 +919,11 @@ namespace EverydaySPnlCountService
             ConnEWNAS ewnas = new ConnEWNAS();
             var Copper = ewnas.ChkIQC一二銅量測申報();
             var Slice = ewnas.ChkIQC切片量測申報();
-            var xlsResult = new DataTable[] { Copper, Slice };
-            SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") +
-                    ".xls";
-            var sheetName = new string[] { "一、二銅", "切片" };
+            var BaseBoard = ewnas.ChkIQC基板銅箔量測申報();
+            var CutCopper = ewnas.ChkIQC磨刷減銅量測申報();
+            var xlsResult = new DataTable[] { Copper, Slice, BaseBoard, CutCopper };
+            SaveFile = Path.GetTempPath() + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + ".xls";
+            var sheetName = new string[] { "一、二銅", "切片", "基板銅箔", "磨刷減銅" };
             DataTableToExcel(xlsResult, sheetName, SaveFile);
             SendMail("sm4@ewpcb.com.tw", "輔助系統IQC表單稽核結果", "chkdeclareqc@ewpcb.com.tw",
                 DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 輔助系統IQC表單稽核結果！",
