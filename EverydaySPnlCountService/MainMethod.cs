@@ -602,7 +602,13 @@ namespace EverydaySPnlCountService
                 var IssueDate = DateTime.Parse(row["IssuePaperDate"].ToString().Trim());
                 if (IssueDate.AddDays(2) <= strNowDate)
                 {
+                    //先檢查是否已增帳
                     if (ConnERP.ChkFMEdStatusScrap(row["ScrapLotNum"].ToString().Trim()))
+                    {
+                        ewnas.DeleteScrapWIPLog(row["ID"].ToString());
+                    }
+                    //再檢查是否有開報廢單
+                    else if (ConnERP.ChkFMEdScrap(row["ID"].ToString()))
                     {
                         ewnas.DeleteScrapWIPLog(row["ID"].ToString());
                     }
