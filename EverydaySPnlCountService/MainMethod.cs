@@ -608,7 +608,7 @@ namespace EverydaySPnlCountService
                         ewnas.DeleteScrapWIPLog(row["ID"].ToString());
                     }
                     //再檢查是否有開報廢單
-                    else if (ConnERP.ChkFMEdScrap(row["ID"].ToString()))
+                    else if (ConnERP.ChkFMEdScrap(row["ScrapLotNum"].ToString()))
                     {
                         ewnas.DeleteScrapWIPLog(row["ID"].ToString());
                     }
