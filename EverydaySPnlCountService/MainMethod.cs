@@ -909,7 +909,6 @@ namespace EverydaySPnlCountService
                     DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 輔助系統表單稽核結果！",
                     "輔助系統表單稽核結果，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
                 #endregion
-
             }
             catch (Exception ex)
             {
@@ -934,6 +933,10 @@ namespace EverydaySPnlCountService
             SendMail("sm4@ewpcb.com.tw", "輔助系統IQC表單稽核結果", "chkdeclareqc@ewpcb.com.tw",
                 DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 輔助系統IQC表單稽核結果！",
                 "輔助系統IQC表單稽核結果，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            Copper.Dispose();
+            Slice.Dispose();
+            BaseBoard.Dispose();
+            CutCopper.Dispose();
         }
 
         /// <summary>
@@ -1003,9 +1006,13 @@ namespace EverydaySPnlCountService
             {
                 InsertLog(DateTime.Now.ToString(datetimeFormat) + "  " + ex.Message + "\r\n");
             }
-            SaveFile.Flush();
-            SaveFile.Close();
-            SaveFile.Dispose();
+            finally
+            {
+                workbook.Close();
+                SaveFile.Flush();
+                SaveFile.Close();
+                SaveFile.Dispose();
+            }
             return result;
         }
 
@@ -1061,7 +1068,7 @@ namespace EverydaySPnlCountService
                         try
                         {
                             MySmtp.Send(SendMail);
-                            InsertLog(sub + "   Send Mail OK!");
+                            //InsertLog(sub + "   Send Mail OK!");
                         }
                         catch (Exception ex)
                         {
@@ -1070,6 +1077,7 @@ namespace EverydaySPnlCountService
                         finally
                         {
                             attachment.Dispose();
+                            SendMail.Dispose();
                         }
                     }
                 }
@@ -1086,6 +1094,10 @@ namespace EverydaySPnlCountService
                         catch (Exception ex)
                         {
                             InsertLog(sub + " " + ex.Message + "\r\n");
+                        }
+                        finally
+                        {
+                            SendMail.Dispose();
                         }
                     }
                 }
