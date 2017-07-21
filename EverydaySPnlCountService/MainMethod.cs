@@ -1089,7 +1089,7 @@ namespace EverydaySPnlCountService
                         try
                         {
                             MySmtp.Send(SendMail);
-                            InsertLog(sub + "   Send Mail OK!");
+                            //InsertLog(sub + "   Send Mail OK!");
                         }
                         catch (Exception ex)
                         {
