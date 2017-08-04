@@ -9,18 +9,14 @@ namespace EverydaySPnlCountService
 {
     class ConnERP
     {
-        static string strCon = "server=ERP;database=EW;uid=jsis;pwd=JSIS";
+        private string strCon = "server=ERP;database=EW;uid=jsis;pwd=JSIS";
 
         private string pDate = string.Empty;
 
         /// <summary>
         /// 指定單據日期
         /// </summary>
-        /// <param name="PaperDate"></param>
-        public ConnERP(string PaperDate)
-        {
-            pDate = PaperDate;
-        }
+        public string PaperDate { get; set; }
 
         /// <summary>
         /// 取得特殊油墨製令單
@@ -28,6 +24,10 @@ namespace EverydaySPnlCountService
         /// <returns></returns>
         public DataTable ChkPrintingInk()
         {
+            if (!string.IsNullOrWhiteSpace(PaperDate))
+            {
+                pDate = PaperDate;
+            }
             var result = new DataTable();
             var strComm = "select A.PaperNum '製令單號', A.PartNum '料號', A.Revision '版序', D.Length '發料/L'," +
                 "D.Width '發料/W',B.POTypeName '訂單種類', CONVERT(int, E.IOQnty) '製令PNL數'," +
@@ -63,6 +63,10 @@ namespace EverydaySPnlCountService
         /// <returns></returns>
         public DataTable GetIssuePaper()
         {
+            if (!string.IsNullOrWhiteSpace(PaperDate))
+            {
+                pDate = PaperDate;
+            }
             var result = new DataTable();
             var strComm = "select A.PaperNum '製令單號',CONVERT(char(10),A.PaperDate,120) '單據日期',A.PartNum '料號'," +
                 "A.Revision '版序',B.POTypeName '訂單類型',CONVERT(int, A.TotalPcs) '製令總Pcs數'," +
@@ -118,6 +122,10 @@ namespace EverydaySPnlCountService
         /// <returns></returns>
         public DataTable ChkIssueResin()
         {
+            if (!string.IsNullOrWhiteSpace(PaperDate))
+            {
+                pDate = PaperDate;
+            }
             var result = new DataTable();
             var strComm = "select A.PaperNum '製令單號', A.PartNum '料號', A.Revision '版序', C.Length '發料/L'," +
                 "C.Width '發料/W', B.POTypeName '訂單種類', CONVERT(int, D.IOQnty) '製令PNL數', CONVERT(char(10)," +
@@ -150,7 +158,7 @@ namespace EverydaySPnlCountService
         /// </summary>
         /// <param name="LotNum">批號</param>
         /// <returns></returns>
-        public static DataTable GetLotInfoSreach(string LotNum)
+        public DataTable GetLotInfoSreach(string LotNum)
         {
             var result = new DataTable();
             var strComm = "sp_executesql N'exec FMEdLotInfoSearch @P1',N'@P1 varchar(255)'," +
@@ -178,7 +186,7 @@ namespace EverydaySPnlCountService
         /// </summary>
         /// <param name="MotherIssueLotNum">母製令單號</param>
         /// <returns>bool</returns>
-        public static bool ChkFMEdTuneSub(string MotherIssueLotNum)
+        public bool ChkFMEdTuneSub(string MotherIssueLotNum)
         {
             var result = false;
             var strComm = "select * from FMEdTuneSub where MotherIssueNum='" + MotherIssueLotNum + "'";
@@ -208,7 +216,7 @@ namespace EverydaySPnlCountService
         /// </summary>
         /// <param name="LotNum">批號</param>
         /// <returns></returns>
-        public static bool ChkFMEdStatusScrap(string LotNum)
+        public bool ChkFMEdStatusScrap(string LotNum)
         {
             var result = false;
             var strComm = "select A.PaperNum,A.PaperDate,B.LotNum,B.PartNum,B.Revision,B.LayerId,B.POP,B.Qnty," +
@@ -241,7 +249,7 @@ namespace EverydaySPnlCountService
         /// </summary>
         /// <param name="LotNum">批號</param>
         /// <returns></returns>
-        public static bool ChkFMEdScrap(string LotNum)
+        public bool ChkFMEdScrap(string LotNum)
         {
             var result = false;
             var strComm = "select A.PaperNum,A.PaperDate,B.LotNum,B.PartNum,B.Revision,B.LayerId,B.POP,B.Qnty, " +

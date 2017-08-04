@@ -6,14 +6,14 @@ namespace EverydaySPnlCountService
 {
     class DFCheckHoleRecord
     {
-        static string strCon = "server=EWNAS;database=ME;uid=me;pwd=2dae5na";
+        private string strCon = "server=EWNAS;database=ME;uid=me;pwd=2dae5na";
 
         /// <summary>
         /// 取得鑽孔生產申報紀錄
         /// </summary>
         /// <param name="WorkDate">查詢的日期</param>
         /// <returns></returns>
-        public static DataTable GetDFRecord(string WorkDate)
+        public DataTable GetDFRecord(string WorkDate)
         {
             var result = new DataTable();
             var strComm = "select departname as '部門',empname as '人員',lotnum as '批號',partnum as '料號'," +
@@ -24,16 +24,18 @@ namespace EverydaySPnlCountService
                 "lotnum like 'M%' and todo=1 order by starttime desc";
             using (SqlConnection sqlcon = new SqlConnection(strCon))
             {
-                SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon);
-                try
+                using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))
                 {
-                    sqlcon.Open();
-                    SqlDataReader read = sqlcomm.ExecuteReader();
-                    result.Load(read);
-                }
-                catch (Exception ex)
-                {
-                    MainMethod.InsertLog(ex.Message);
+                    try
+                    {
+                        sqlcon.Open();
+                        SqlDataReader read = sqlcomm.ExecuteReader();
+                        result.Load(read);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainMethod.InsertLog(ex.Message);
+                    }
                 }
             }
             return result;
