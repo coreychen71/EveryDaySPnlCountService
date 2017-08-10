@@ -29,10 +29,10 @@ namespace EverydaySPnlCountService
         {
             timer = new Timer();
             timer.Interval = timerInterval;
-            timer.AutoReset = false;
+            timer.AutoReset = true;
             timer.Elapsed += Timer_Elapsed;
             timer2.Interval = 60 * 5000;
-            timer2.AutoReset = false;
+            timer2.AutoReset = true;
             timer2.Elapsed += Timer2_Elapsed;
             //SPnlCountRun();
             //GetEveryDayCustomerComplaint();
@@ -1038,9 +1038,9 @@ namespace EverydaySPnlCountService
                     {
                         log.Insert(row["目前途程"].ToString().Substring(0, 4), row["批號"].ToString().Trim(),
                             row["料號"].ToString().Trim(), row["版序"].ToString().Trim(), row["層別"].ToString().Trim(),
-                            row["型別"].ToString().Trim(), row["數量"].ToString().Trim(), row["重工"].ToString().Trim(),
+                            row["片型"].ToString().Trim(), row["數量"].ToString().Trim(), row["重工"].ToString().Trim(),
                             row["下站途程"].ToString().Substring(0, 4));
-                        strResult = string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}<br/>",
+                        strResult = string.Format("{0}<br/>{1}<br/>{2}<br/>{3}<br/>{4}<br/>{5}<br/>{6}<br/>{7}<br/>{8}<br/>",
                             "批號：" + row["批號"].ToString(),
                             "料號：" + row["料號"].ToString(),
                             "版序：" + row["版序"].ToString(),

@@ -68,7 +68,7 @@ namespace EverydaySPnlCountService
             var strComm = "insert into CheckVCUT_JumpLog(ProcCode,LotNum,PartNum,Revision,LayerId,POP,Qnty,ReWork," +
                 "NextProcCode,LogTime) values('" + ProcCode + "','" + LotNum + "','" + PartNum + "','" + Revision + "','" +
                 LayerId + "','" + POP + "','" + Qnty + "','" + ReWork + "','" + NextProcCode + "','" +
-                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss" + "')");
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "')";
             using (SqlConnection sqlcon = new SqlConnection(strCon))
             {
                 using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))
