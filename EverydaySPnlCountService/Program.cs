@@ -23,7 +23,6 @@ namespace EverydaySPnlCountService
             {
                 MainMethod mm = new MainMethod();
                 mm.Start();
-                mm.StartTimer2();
                 Console.ReadLine();
             }
         }

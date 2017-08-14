@@ -13,15 +13,16 @@ namespace EverydaySPnlCountService
 {
     class MainMethod
     {
-        //依設定時間執行用
+        //依設定時間執行用Timer
         private Timer timer = new Timer();
-        //固定每5分鐘就執行
+        //固定每5分鐘就執行的Timer
         private Timer timer2 = new Timer();
+        //設定Timer1間隔時間為1分鐘
+        private double timerInterval = 60 * 1000;
+        //設定Timer2間隔時間為5分鐘
+        private double timerInterval2 = 5 * 60 * 1000;
         //private DateTime setTime;
         private DateTime nowTime;
-        //設定間隔時間為1分鐘
-        private double timerInterval = 60 * 1000;
-
         private string datetimeFormat = "yyyy-MM-dd HH:mm:ss";
         private string SaveFile="";
 
@@ -31,9 +32,10 @@ namespace EverydaySPnlCountService
             timer.Interval = timerInterval;
             timer.AutoReset = true;
             timer.Elapsed += Timer_Elapsed;
-            timer2.Interval = 60 * 5000;
+            timer2.Interval = timerInterval2;
             timer2.AutoReset = true;
             timer2.Elapsed += Timer2_Elapsed;
+            timer2.Start();
             //SPnlCountRun();
             //GetEveryDayCustomerComplaint();
             //ChkProductDailyReport();
@@ -60,22 +62,6 @@ namespace EverydaySPnlCountService
         public void Stop()
         {
             timer.Stop();
-        }
-
-        /// <summary>
-        /// Timer2 Start
-        /// </summary>
-        public void StartTimer2()
-        {
-            timer2.Start();
-        }
-
-        /// <summary>
-        /// Timer2 Stop
-        /// </summary>
-        public void StopTimer2()
-        {
-            timer2.Stop();
         }
 
         /// <summary>
@@ -151,9 +137,9 @@ namespace EverydaySPnlCountService
         /// <param name="e"></param>
         private void Timer2_Elapsed(object sender, ElapsedEventArgs e)
         {
-            StopTimer2();
+            timer2.Stop();
             ChkVCUT_Jump();
-            StartTimer2();
+            timer2.Start();
         }
         #endregion
 
