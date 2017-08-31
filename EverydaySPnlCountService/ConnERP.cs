@@ -9,6 +9,9 @@ namespace EverydaySPnlCountService
 {
     class ConnERP
     {
+        /// <summary>
+        /// SQL Connection String
+        /// </summary>
         private string strCon = "server=ERP;database=EW;uid=jsis;pwd=JSIS";
 
         private string pDate = string.Empty;
@@ -17,6 +20,34 @@ namespace EverydaySPnlCountService
         /// 指定單據日期
         /// </summary>
         public string PaperDate { get; set; }
+
+        /// <summary>
+        /// 查詢倉庫不足安全庫量物料
+        /// </summary>
+        /// <returns></returns>
+        public DataTable CheckDepotStock()
+        {
+            var Result = new DataTable();
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                using (SqlCommand sqlcomm = new SqlCommand(string.Empty, sqlcon))
+                {
+                    sqlcomm.CommandType = CommandType.StoredProcedure;
+                    sqlcomm.CommandText = "查詢倉庫不足安全庫存量物料";
+                    try
+                    {
+                        sqlcon.Open();
+                        SqlDataReader reader = sqlcomm.ExecuteReader();
+                        Result.Load(reader);
+                    }
+                    catch(Exception ex)
+                    {
+                        MainMethod.InsertLog("ConnERP.ChkPrintingInk()-" + ex.Message);
+                    }
+                }
+            }
+            return Result;
+        }
 
         /// <summary>
         /// 取得特殊油墨製令單

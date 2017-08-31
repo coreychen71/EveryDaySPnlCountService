@@ -44,6 +44,7 @@ namespace EverydaySPnlCountService
             //ChkIssueAndScrapWIP();
             //ChkScrapWIPLog();
             //ChkIQC每日量測申報紀錄();
+            //ChkDepotStock();
             //ChkVCUT_Jump();
         }
 
@@ -86,6 +87,13 @@ namespace EverydaySPnlCountService
                 ChkIQC每日量測申報紀錄();
                 Start();
             }
+            //每日08:00查詢倉庫不足安全庫存量物料
+            else if (CheckTime("08:00:00", "08:00:59"))
+            {
+                Stop();
+                ChkDepotStock();
+                Start();
+            }
             //每日08:15進行輔助系統生產日報表稽核
             else if (CheckTime("08:15:00", "08:15:59"))
             {
@@ -98,6 +106,13 @@ namespace EverydaySPnlCountService
             {
                 Stop();
                 EquipMaintainRun();
+                Start();
+            }
+            //每日16:30查詢倉庫不足安全庫存量物料
+            else if (CheckTime("16:30:00", "16:30:59"))
+            {
+                Stop();
+                ChkDepotStock();
                 Start();
             }
             //每日00:10進行每日製令稽核現帳預報廢清單(Excel)
@@ -990,6 +1005,23 @@ namespace EverydaySPnlCountService
             Slice.Dispose();
             BaseBoard.Dispose();
             CutCopper.Dispose();
+        }
+
+        /// <summary>
+        /// 查詢倉庫不足安全庫存量物料
+        /// </summary>
+        private void ChkDepotStock()
+        {
+            ConnERP erp = new ConnERP();
+            var Result = erp.CheckDepotStock();
+            var TB = new DataTable[] { Result };
+            var Sheet = new string[] { DateTime.Now.ToString("yyyy-MM-dd_HHmm") };
+            SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd_HHmm") + "清單.xls";
+            DataTableToExcel(TB, Sheet, SaveFile);
+            SendMail("sm4@ewpcb.com.tw", "倉庫不足安全庫存量物料結果", "depotstock@ewpcb.com.tw",
+                DateTime.Now.ToString("yyyy-MM-dd_HH:mm") + " 倉庫不足安全庫存量物料！",
+                "倉庫不足安全庫存量物料，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            Result.Dispose();
         }
 
         /// <summary>
