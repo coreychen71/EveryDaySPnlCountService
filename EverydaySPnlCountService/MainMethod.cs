@@ -46,6 +46,7 @@ namespace EverydaySPnlCountService
             //ChkIQC每日量測申報紀錄();
             //ChkDepotStock();
             //ChkVCUT_Jump();
+            //ChkFMEdIssueNote();
         }
 
         #region Timer Block
@@ -154,6 +155,7 @@ namespace EverydaySPnlCountService
         {
             timer2.Stop();
             ChkVCUT_Jump();
+            ChkFMEdIssueNote();
             timer2.Start();
         }
         #endregion
@@ -1071,6 +1073,47 @@ namespace EverydaySPnlCountService
                         SendMail("sm4@ewpcb.com.tw", "V-CUT跳刀料號進站通知", "checkvcutjump@ewpcb.com.tw",
                             DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " V-CUT跳刀料號進站通知！",
                             strResult + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 檢查每日新製令單的料號各途程注意事項
+        /// </summary>
+        private void ChkFMEdIssueNote()
+        {
+            CheckFMEdIssueNote cfin = new CheckFMEdIssueNote();
+            //取得當天已完成的新製令單
+            var srcData = cfin.GetTodayFMEdIssue();
+            foreach (DataRow row in srcData.Rows)
+            {
+                //檢查新製令單號是否有在Log記錄裡，若有就表示已發過信，所以不再重覆發送。
+                if (!cfin.CheckIssueLog(row["製令單號"].ToString()))
+                {
+                    var SpecialNote = string.Empty;
+                    var srcNote = cfin.GetIssueNote(row["料號"].ToString(), row["版序"].ToString());
+                    if (srcNote.Rows.Count > 0)
+                    {
+                        //製令單資訊
+                        SpecialNote = string.Format("製令單號：{0}<br/>作業時間：{1}<br/>訂單種類：{2}<br/>批量種類：{3}" +
+                            "<br/>料號：{4}<br/>版序：{5}<br/>製令總PCS數：{6}<br/><br/>" +
+                            "======== 各途程注意事項如下 ========<br/><br/>",
+                            row["製令單號"].ToString(), row["作業時間"].ToString(), row["訂單種類"].ToString(),
+                            row["批量種類"].ToString(), row["料號"].ToString(), row["版序"].ToString(),
+                            row["製令總PCS數"].ToString());
+                        //注意事項
+                        foreach (DataRow noteRow in srcNote.Rows)
+                        {
+                            SpecialNote += string.Format("<pre>層別：{0}、途程：{1}、注意事項：{2}<pre/><br/>",
+                                noteRow["層別"].ToString(), noteRow["途程"].ToString(),
+                                noteRow["注意事項"].ToString().Trim());
+                        }
+                        SendMail("sm4@ewpcb.com.tw", "新製令單注意事項通知", "chkfmedissuenote@ewpcb.com.tw",
+                            DateTime.Now.ToString("yyyy-MM-dd") + " 新製令單注意事項通知，料號：" + row["料號"].ToString() + "！",
+                            SpecialNote + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                        //寫入Log
+                        cfin.InsertIssueLog(row["製令單號"].ToString());
                     }
                 }
             }

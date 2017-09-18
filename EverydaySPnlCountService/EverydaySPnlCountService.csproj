@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckFMEdIssueNote.cs" />
     <Compile Include="CheckVCUT_Jump.cs" />
     <Compile Include="CheckVCUT_JumpLog.cs" />
     <Compile Include="ConnERP.cs" />
