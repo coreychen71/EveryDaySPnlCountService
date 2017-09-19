@@ -47,6 +47,7 @@ namespace EverydaySPnlCountService
             //ChkDepotStock();
             //ChkVCUT_Jump();
             //ChkFMEdIssueNote();
+            //ChkTracePartNum();
         }
 
         #region Timer Block
@@ -102,6 +103,13 @@ namespace EverydaySPnlCountService
                 ChkProductDailyReport();
                 Start();
             }
+            //每日11:30進行新製令單特殊事項檢查
+            else if (CheckTime("11:30:00", "11:30:59"))
+            {
+                Stop();
+                ChkTracePartNum();
+                Start();
+            }
             //每日16:00進行待修設備清單(Excel)
             else if (CheckTime("16:00:00", "16:00:59"))
             {
@@ -109,11 +117,12 @@ namespace EverydaySPnlCountService
                 EquipMaintainRun();
                 Start();
             }
-            //每日16:30查詢倉庫不足安全庫存量物料
+            //每日16:30查詢倉庫不足安全庫存量物料、新製令單特殊事項檢查
             else if (CheckTime("16:30:00", "16:30:59"))
             {
                 Stop();
                 ChkDepotStock();
+                ChkTracePartNum();
                 Start();
             }
             //每日00:10進行每日製令稽核現帳預報廢清單(Excel)
@@ -155,7 +164,8 @@ namespace EverydaySPnlCountService
         {
             timer2.Stop();
             ChkVCUT_Jump();
-            ChkFMEdIssueNote();
+            //2017/09/19 停用，主管反應信件過多
+            //ChkFMEdIssueNote();
             timer2.Start();
         }
         #endregion
@@ -1079,7 +1089,7 @@ namespace EverydaySPnlCountService
         }
 
         /// <summary>
-        /// 檢查每日新製令單的料號各途程注意事項
+        /// 檢查每日新製令單的料號各途程注意事項，106/09/19停用
         /// </summary>
         private void ChkFMEdIssueNote()
         {
@@ -1117,6 +1127,61 @@ namespace EverydaySPnlCountService
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 檢查每日新製令單的料號特殊注意事項
+        /// </summary>
+        private void ChkTracePartNum()
+        {
+            var Result = new DataTable();
+            Result.Columns.Add("製令單號");
+            Result.Columns.Add("作業時間");
+            Result.Columns.Add("訂單種類");
+            Result.Columns.Add("批量種類");
+            Result.Columns.Add("料號");
+            Result.Columns.Add("版序");
+            Result.Columns.Add("製令總PCS數");
+            Result.Columns.Add("特殊注意事項");
+            CheckFMEdIssueNote chk = new CheckFMEdIssueNote();
+            var srcData = chk.GetTodayFMEdIssue();
+            foreach (DataRow row in srcData.Rows)
+            {
+                if (!chk.CheckIssueLog(row["料號"].ToString()))
+                {
+                    var SpecialData = chk.GetTeacePartNum(row["料號"].ToString().Substring(0, 7));
+                    DataRow NewRow = Result.NewRow();
+                    NewRow["製令單號"] = row["製令單號"].ToString();
+                    NewRow["作業時間"] = row["作業時間"].ToString();
+                    NewRow["訂單種類"] = row["訂單種類"].ToString();
+                    NewRow["批量種類"] = row["批量種類"].ToString();
+                    NewRow["料號"] = row["料號"].ToString();
+                    NewRow["版序"] = row["版序"].ToString();
+                    NewRow["製令總PCS數"] = row["製令總PCS數"].ToString();
+                    if (SpecialData.Rows.Count == 0)
+                    {
+                        NewRow["特殊注意事項"] = string.Empty;
+                    }
+                    else
+                    {
+                        for (int i = 0; i < SpecialData.Rows.Count; i++)
+                        {
+                            NewRow["特殊注意事項"] += (i + 1) + ". " + SpecialData.Rows[i]["特殊事項"].ToString().Trim() +
+                                " ";
+                        }
+                    }
+                    Result.Rows.Add(NewRow);
+                    //寫入Log
+                    chk.InsertIssueLog(row["製令單號"].ToString());
+                }
+            }
+            SaveFile = Path.GetTempPath() + @"\SpecialPartNum.xls";
+            var srcTable = new DataTable[] { Result };
+            var srcSheetName = new string[] { "新製令單料號特殊注意事項" };
+            DataTableToExcel(srcTable, srcSheetName, SaveFile);
+            SendMail("sm4@ewpcb.com.tw", "新製令單特殊注意事項通知", "chkfmedissuenote@ewpcb.com.tw", 
+                DateTime.Now.ToString("yyyy-MM-dd") + " 新製令單注意事項通知！",
+                "新製令單特殊注意事項通知，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>

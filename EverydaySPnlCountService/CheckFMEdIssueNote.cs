@@ -135,5 +135,34 @@ namespace EverydaySPnlCountService
             }
             return Result;
         }
+
+        /// <summary>
+        /// 取得Ewproject料號特殊追蹤事項清單
+        /// </summary>
+        /// <param name="PartNum">料號，只需要料號前7碼即可。</param>
+        /// <returns></returns>
+        public DataTable GetTeacePartNum(string PartNum)
+        {
+            var Result = new DataTable();
+            var strComm = "select PARTNUM '料號', AFFAIR '特殊事項' from TRACEPARTNUM where PARTNUM like '" +
+                PartNum + "%'";
+            using (SqlConnection sqlcon = new SqlConnection(strConME))
+            {
+                using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))
+                {
+                    try
+                    {
+                        sqlcon.Open();
+                        SqlDataReader reader = sqlcomm.ExecuteReader();
+                        Result.Load(reader);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainMethod.InsertLog(ex.Message);
+                    }
+                }
+            }
+            return Result;
+        }
     }
 }
