@@ -103,7 +103,7 @@ namespace EverydaySPnlCountService
                 ChkProductDailyReport();
                 Start();
             }
-            //每日11:30進行新製令單特殊事項檢查
+            //每日11:30進行未交貨完畢製令單特殊事項檢查
             else if (CheckTime("11:30:00", "11:30:59"))
             {
                 Stop();
@@ -117,11 +117,18 @@ namespace EverydaySPnlCountService
                 EquipMaintainRun();
                 Start();
             }
-            //每日16:30查詢倉庫不足安全庫存量物料、新製令單特殊事項檢查
+            //每日16:30查詢倉庫不足安全庫存量物料、未交貨完畢製令單特殊事項檢查
             else if (CheckTime("16:30:00", "16:30:59"))
             {
                 Stop();
                 ChkDepotStock();
+                ChkTracePartNum();
+                Start();
+            }
+            //每日22:30進行未交貨完畢製令單特殊事項檢查
+            else if (CheckTime("22:30:00", "2:30:59"))
+            {
+                Stop();
                 ChkTracePartNum();
                 Start();
             }
@@ -1089,48 +1096,7 @@ namespace EverydaySPnlCountService
         }
 
         /// <summary>
-        /// 檢查每日新製令單的料號各途程注意事項，106/09/19停用
-        /// </summary>
-        private void ChkFMEdIssueNote()
-        {
-            CheckFMEdIssueNote cfin = new CheckFMEdIssueNote();
-            //取得當天已完成的新製令單
-            var srcData = cfin.GetTodayFMEdIssue();
-            foreach (DataRow row in srcData.Rows)
-            {
-                //檢查新製令單號是否有在Log記錄裡，若有就表示已發過信，所以不再重覆發送。
-                if (!cfin.CheckIssueLog(row["製令單號"].ToString()))
-                {
-                    var SpecialNote = string.Empty;
-                    var srcNote = cfin.GetIssueNote(row["料號"].ToString(), row["版序"].ToString());
-                    if (srcNote.Rows.Count > 0)
-                    {
-                        //製令單資訊
-                        SpecialNote = string.Format("製令單號：{0}<br/>作業時間：{1}<br/>訂單種類：{2}<br/>批量種類：{3}" +
-                            "<br/>料號：{4}<br/>版序：{5}<br/>製令總PCS數：{6}<br/><br/>" +
-                            "======== 各途程注意事項如下 ========<br/><br/>",
-                            row["製令單號"].ToString(), row["作業時間"].ToString(), row["訂單種類"].ToString(),
-                            row["批量種類"].ToString(), row["料號"].ToString(), row["版序"].ToString(),
-                            row["製令總PCS數"].ToString());
-                        //注意事項
-                        foreach (DataRow noteRow in srcNote.Rows)
-                        {
-                            SpecialNote += string.Format("<pre>層別：{0}、途程：{1}、注意事項：{2}<pre/><br/>",
-                                noteRow["層別"].ToString(), noteRow["途程"].ToString(),
-                                noteRow["注意事項"].ToString().Trim());
-                        }
-                        SendMail("sm4@ewpcb.com.tw", "新製令單注意事項通知", "chkfmedissuenote@ewpcb.com.tw",
-                            DateTime.Now.ToString("yyyy-MM-dd") + " 新製令單注意事項通知，料號：" + row["料號"].ToString() + "！",
-                            SpecialNote + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
-                        //寫入Log
-                        cfin.InsertIssueLog(row["製令單號"].ToString());
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 檢查每日新製令單的料號特殊注意事項
+        /// 檢查所有未交貨完畢製令單的料號特殊注意事項
         /// </summary>
         private void ChkTracePartNum()
         {
@@ -1144,12 +1110,12 @@ namespace EverydaySPnlCountService
             Result.Columns.Add("製令總PCS數");
             Result.Columns.Add("特殊注意事項");
             CheckFMEdIssueNote chk = new CheckFMEdIssueNote();
-            var srcData = chk.GetTodayFMEdIssue();
+            var srcData = chk.GetAllFMEdIssue();
             foreach (DataRow row in srcData.Rows)
             {
-                if (!chk.CheckIssueLog(row["料號"].ToString()))
+                var SpecialData = chk.GetTeacePartNum(row["料號"].ToString().Substring(0, 7));
+                if (SpecialData.Rows.Count > 0)
                 {
-                    var SpecialData = chk.GetTeacePartNum(row["料號"].ToString().Substring(0, 7));
                     DataRow NewRow = Result.NewRow();
                     NewRow["製令單號"] = row["製令單號"].ToString();
                     NewRow["作業時間"] = row["作業時間"].ToString();
@@ -1158,30 +1124,21 @@ namespace EverydaySPnlCountService
                     NewRow["料號"] = row["料號"].ToString();
                     NewRow["版序"] = row["版序"].ToString();
                     NewRow["製令總PCS數"] = row["製令總PCS數"].ToString();
-                    if (SpecialData.Rows.Count == 0)
+                    for (int i = 0; i < SpecialData.Rows.Count; i++)
                     {
-                        NewRow["特殊注意事項"] = string.Empty;
-                    }
-                    else
-                    {
-                        for (int i = 0; i < SpecialData.Rows.Count; i++)
-                        {
-                            NewRow["特殊注意事項"] += (i + 1) + ". " + SpecialData.Rows[i]["特殊事項"].ToString().Trim() +
-                                " ";
-                        }
+                        NewRow["特殊注意事項"] += (i + 1) + ". " + SpecialData.Rows[i]["特殊事項"].ToString().Trim() +
+                            " ";
                     }
                     Result.Rows.Add(NewRow);
-                    //寫入Log
-                    chk.InsertIssueLog(row["製令單號"].ToString());
                 }
             }
             SaveFile = Path.GetTempPath() + @"\SpecialPartNum.xls";
             var srcTable = new DataTable[] { Result };
-            var srcSheetName = new string[] { "新製令單料號特殊注意事項" };
+            var srcSheetName = new string[] { "製令單特殊注意事項" };
             DataTableToExcel(srcTable, srcSheetName, SaveFile);
-            SendMail("sm4@ewpcb.com.tw", "新製令單特殊注意事項通知", "chkfmedissuenote@ewpcb.com.tw", 
-                DateTime.Now.ToString("yyyy-MM-dd") + " 新製令單注意事項通知！",
-                "新製令單特殊注意事項通知，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            SendMail("sm4@ewpcb.com.tw", "製令單特殊注意事項通知", "chkfmedissuenote@ewpcb.com.tw", 
+                DateTime.Now.ToString("yyyy-MM-dd_HHmm") + " 製令單特殊注意事項通知！",
+                "製令單特殊注意事項通知，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>

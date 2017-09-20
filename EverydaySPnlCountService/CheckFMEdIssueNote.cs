@@ -14,17 +14,18 @@ namespace EverydaySPnlCountService
         private string strConME = "server=EWNAS;database=ME;uid=me;pwd=2dae5na";
 
         /// <summary>
-        /// 取得當天已完成的製令單
+        /// 取得所有未交貨完畢的製令單
         /// </summary>
         /// <returns></returns>
-        public DataTable GetTodayFMEdIssue()
+        public DataTable GetAllFMEdIssue()
         {
             var Result = new DataTable();
-            var strComm = "select t1.PaperNum '製令單號', CONVERT(char(19),t1.BuildDate,120) '作業時間', " +
-                "t2.POTypeName '訂單種類', t1.LotNotes '批量種類', t1.PartNum '料號', t1.Revision '版序', " +
-                "CONVERT(int, TotalPcs) '製令總PCS數' from FMEdIssueMain t1, FMEdPOType t2 " +
-                "where t1.PaperDate = CONVERT(char(10), SYSDATETIME(), 120) and t1.Finished = 1 and " +
-                "t1.POType = t2.POType order by t1.PaperNum";
+            var strComm = "select t1.PaperNum '製令單號', t3.Item '項次', t3.PONum '備料單號', " +
+                "CONVERT(char(19),t1.BuildDate,120) '作業時間', t2.POTypeName '訂單種類', t1.LotNotes '批量種類', " +
+                "t1.PartNum '料號', t1.Revision '版序', CONVERT(int, TotalPcs) '製令總PCS數' " +
+                "from FMEdIssueMain t1, FMEdPOType t2, FMEdIssuePO t3, SPOdOrderMain t4 " +
+                "where t1.Finished = 1 and t1.POType = t2.POType and t1.PaperNum = t3.PaperNum and " +
+                "t3.PONum = t4.PaperNum and t4.Finished = 1 order by t1.PaperNum, t3.Item";
             using (SqlConnection sqlcon = new SqlConnection(strCon))
             {
                 using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))
