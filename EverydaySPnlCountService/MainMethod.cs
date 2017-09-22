@@ -126,7 +126,7 @@ namespace EverydaySPnlCountService
                 Start();
             }
             //每日22:30進行未交貨完畢製令單特殊事項檢查
-            else if (CheckTime("22:30:00", "2:30:59"))
+            else if (CheckTime("22:30:00", "22:30:59"))
             {
                 Stop();
                 ChkTracePartNum();
