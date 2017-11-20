@@ -306,5 +306,40 @@ namespace EverydaySPnlCountService
             }
             return result;
         }
+
+        /// <summary>
+        /// 檢查製程現帳中，該料號、版序的途程是否有420 二次鑽這一站。
+        /// </summary>
+        /// <param name="PartNum">料號</param>
+        /// <param name="Revision">版序</param>
+        /// <returns></returns>
+        public DataTable CheckFMEdProcDrill2nd(string PartNum, string Revision)
+        {
+            var Result = new DataTable();
+            var strComm = string.Empty;
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))
+                {
+                    sqlcomm.CommandType = CommandType.StoredProcedure;
+                    sqlcomm.CommandText = "CheckFMEdProcDrill2nd";
+                    sqlcomm.Parameters.Add("@PartNum", SqlDbType.Char);
+                    sqlcomm.Parameters.Add("@Revision", SqlDbType.Char);
+                    sqlcomm.Parameters["@PartNum"].Value = PartNum;
+                    sqlcomm.Parameters["@Revision"].Value = Revision;
+                    try
+                    {
+                        sqlcon.Open();
+                        SqlDataReader reader = sqlcomm.ExecuteReader();
+                        Result.Load(reader);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainMethod.InsertLog("ConnEWNAS.CheckFMEdProcDrill2nd()-" + ex.Message);
+                    }
+                }
+            }
+            return Result;
+        }
     }
 }

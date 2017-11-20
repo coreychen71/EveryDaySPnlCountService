@@ -48,6 +48,7 @@ namespace EverydaySPnlCountService
             //ChkVCUT_Jump();
             //ChkFMEdIssueNote();
             //ChkTracePartNum();
+            //ChkDrill2ndProcByMonth();
         }
 
         #region Timer Block
@@ -96,11 +97,18 @@ namespace EverydaySPnlCountService
                 ChkDepotStock();
                 Start();
             }
-            //每日08:15進行輔助系統生產日報表稽核
-            else if (CheckTime("08:15:00", "08:15:59"))
+            //每日08:20進行輔助系統生產日報表稽核
+            else if (CheckTime("08:20:00", "08:20:59"))
             {
                 Stop();
                 ChkProductDailyReport();
+                Start();
+            }
+            //每日09:00進行二次鑽料號工單漏420途程通知
+            else if (CheckTime("09:00:00", "09:00:59"))
+            {
+                Stop();
+                ChkDrill2ndProcByMonth();
                 Start();
             }
             //每日11:30進行未交貨完畢製令單特殊事項檢查
@@ -117,12 +125,13 @@ namespace EverydaySPnlCountService
                 EquipMaintainRun();
                 Start();
             }
-            //每日16:30查詢倉庫不足安全庫存量物料、未交貨完畢製令單特殊事項檢查
+            //每日16:30查詢倉庫不足安全庫存量物料、未交貨完畢製令單特殊事項檢查、二次鑽料號工單漏420途程通知
             else if (CheckTime("16:30:00", "16:30:59"))
             {
                 Stop();
                 ChkDepotStock();
                 ChkTracePartNum();
+                ChkDrill2ndProcByMonth();
                 Start();
             }
             //每日22:30進行未交貨完畢製令單特殊事項檢查
@@ -1139,6 +1148,50 @@ namespace EverydaySPnlCountService
             SendMail("sm4@ewpcb.com.tw", "製令單特殊注意事項通知", "chkfmedissuenote@ewpcb.com.tw", 
                 DateTime.Now.ToString("yyyy-MM-dd_HHmm") + " 製令單特殊注意事項通知！",
                 "製令單特殊注意事項通知，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+        }
+
+        /// <summary>
+        /// 檢查每月工程部NAS鑽孔程式資料夾裡的料號是有含二次鑽程式
+        /// 若有含就要去檢查目前製程現帳中該料號的途程是否有420這一站！
+        /// 若沒有就要發信通知工程、生管、廠長，每天早上和下午各檢查一次。
+        /// </summary>
+        private void ChkDrill2ndProcByMonth()
+        {
+            var Result = string.Format("{0}　　　　　{1}　　　　　　{2}　　　{3}　　　{4}<br/>",
+                "批號", "料號", "版序", "數量", "目前途程");
+            var srcDirectory = @"\\n5200xxx\鑽孔與成型二\" + DateTime.Now.ToString("yyyy-MM") + @"\";
+            DirectoryInfo directoryMain = new DirectoryInfo(srcDirectory);
+            var directorySub = directoryMain.GetDirectories();
+            foreach (DirectoryInfo GetDirSubInfo in directorySub)
+            {
+                var PartNumDir = GetDirSubInfo.GetDirectories();
+                foreach (DirectoryInfo PartNumDirSub in PartNumDir)
+                {
+                    var strFilePath = PartNumDirSub.FullName + @"\" + PartNumDirSub.Name + ".2nd";
+                    if (File.Exists(strFilePath))
+                    {
+                        var PartNum = PartNumDirSub.Name.Substring(0, 11);
+                        var Revision = PartNumDirSub.Name.Substring(12, 3);
+                        ConnERP connERP = new ConnERP();
+                        var tempResult = connERP.CheckFMEdProcDrill2nd(PartNum, Revision);
+                        if (tempResult.Rows.Count != 0)
+                        {
+                            foreach (DataRow row in tempResult.Rows)
+                            {
+                                Result += string.Format("{0}　　{1}　　{2}　　　{3}　　　　　{4}<br/>",
+                                    row["LotNum"].ToString(),
+                                    row["PartNum"].ToString(),
+                                    row["Revision"].ToString(),
+                                    row["Qnty"].ToString(),
+                                    row["ProcCode"].ToString());
+                            }
+                        }
+                    }
+                }
+            }
+            SendMail("sm4@ewpcb.com.tw", "二次鑽料號工單漏420途程通知", "drill2nd@ewpcb.com.tw",
+                            DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 二次鑽料號工單漏420途程通知！",
+                            Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
         }
 
         /// <summary>
