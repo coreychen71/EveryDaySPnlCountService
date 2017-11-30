@@ -201,7 +201,7 @@ namespace EverydaySPnlCountService
             StreamWriter writerLog;
             //此方式為每次寫入時，持續寫入，不會覆蓋原本內容
             writerLog = File.AppendText(LogPath);
-            writerLog.WriteLine(DateTime.Now.ToString("yyyy -MM-dd HH:mm:ss") + "  " + Msg + "\r\n");
+            writerLog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + Msg + "\r\n");
             writerLog.Flush();
             writerLog.Close();
             writerLog.Dispose();
@@ -1159,39 +1159,48 @@ namespace EverydaySPnlCountService
         {
             var Result = string.Format("{0}　　　　　{1}　　　　　　{2}　　　{3}　　　{4}<br/>",
                 "批號", "料號", "版序", "數量", "目前途程");
-            var srcDirectory = @"\\n5200xxx\鑽孔與成型二\" + DateTime.Now.ToString("yyyy-MM") + @"\";
-            DirectoryInfo directoryMain = new DirectoryInfo(srcDirectory);
-            var directorySub = directoryMain.GetDirectories();
-            foreach (DirectoryInfo GetDirSubInfo in directorySub)
+            //開發測試時使用
+            //var srcDirectory = @"\\n5200xxx\鑽孔與成型二\" + DateTime.Now.ToString("yyyy-MM") + @"\";
+            var srcDirectory = @"D:\鑽孔與成型二\" + DateTime.Now.ToString("yyyy-MM") + @"\";
+            try
             {
-                var PartNumDir = GetDirSubInfo.GetDirectories();
-                foreach (DirectoryInfo PartNumDirSub in PartNumDir)
+                DirectoryInfo directoryMain = new DirectoryInfo(srcDirectory);
+                var directorySub = directoryMain.GetDirectories();
+                foreach (DirectoryInfo GetDirSubInfo in directorySub)
                 {
-                    var strFilePath = PartNumDirSub.FullName + @"\" + PartNumDirSub.Name + ".2nd";
-                    if (File.Exists(strFilePath))
+                    var PartNumDir = GetDirSubInfo.GetDirectories();
+                    foreach (DirectoryInfo PartNumDirSub in PartNumDir)
                     {
-                        var PartNum = PartNumDirSub.Name.Substring(0, 11);
-                        var Revision = PartNumDirSub.Name.Substring(12, 3);
-                        ConnERP connERP = new ConnERP();
-                        var tempResult = connERP.CheckFMEdProcDrill2nd(PartNum, Revision);
-                        if (tempResult.Rows.Count != 0)
+                        var strFilePath = PartNumDirSub.FullName + @"\" + PartNumDirSub.Name + ".2nd";
+                        if (File.Exists(strFilePath))
                         {
-                            foreach (DataRow row in tempResult.Rows)
+                            var PartNum = PartNumDirSub.Name.Substring(0, 11);
+                            var Revision = PartNumDirSub.Name.Substring(12, 3);
+                            ConnERP connERP = new ConnERP();
+                            var tempResult = connERP.CheckFMEdProcDrill2nd(PartNum, Revision);
+                            if (tempResult.Rows.Count != 0)
                             {
-                                Result += string.Format("{0}　　{1}　　{2}　　　{3}　　　　　{4}<br/>",
-                                    row["LotNum"].ToString(),
-                                    row["PartNum"].ToString(),
-                                    row["Revision"].ToString(),
-                                    row["Qnty"].ToString(),
-                                    row["ProcCode"].ToString());
+                                foreach (DataRow row in tempResult.Rows)
+                                {
+                                    Result += string.Format("{0}　　{1}　　{2}　　　{3}　　　　　{4}<br/>",
+                                        row["LotNum"].ToString(),
+                                        row["PartNum"].ToString(),
+                                        row["Revision"].ToString(),
+                                        row["Qnty"].ToString(),
+                                        row["ProcCode"].ToString());
+                                }
                             }
                         }
                     }
                 }
+                SendMail("sm4@ewpcb.com.tw", "二次鑽料號工單漏420途程通知", "drill2nd@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " 二次鑽料號工單漏420途程通知！",
+                    Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
             }
-            SendMail("sm4@ewpcb.com.tw", "二次鑽料號工單漏420途程通知", "drill2nd@ewpcb.com.tw",
-                            DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") + " 二次鑽料號工單漏420途程通知！",
-                            Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+            catch (Exception ex)
+            {
+                InsertLog("ChkDrill2ndProcByMonth()-" + ex.Message);
+            }
         }
 
         /// <summary>
