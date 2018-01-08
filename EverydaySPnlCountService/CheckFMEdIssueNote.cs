@@ -20,14 +20,11 @@ namespace EverydaySPnlCountService
         public DataTable GetAllFMEdIssue()
         {
             var Result = new DataTable();
-            var strComm = "select DISTINCT(t1.PaperNum) '製令單號', t3.PONum '備料單號', " +
-                "CONVERT(char(19), t1.BuildDate, 120) '作業時間', t2.POTypeName '訂單種類', t1.LotNotes '批量種類', " +
-                "t1.PartNum '料號', t1.Revision '版序', CONVERT(int, t1.TotalPcs) '製令總PCS數' " +
-                "from FMEdIssueMain t1, FMEdPOType t2, FMEdIssuePO t3, SPOdOrderMain t4 " +
+            var strComm = "select DISTINCT(t1.PartNum) '料號', t1.Revision '版序', CONVERT(int,SUM(t1.TotalPcs)) " +
+                "'製令總PCS數' from FMEdIssueMain t1, FMEdPOType t2, FMEdIssuePO t3, SPOdOrderMain t4 " +
                 "where t1.Finished = 1 and t1.POType = t2.POType and t1.PaperNum = t3.PaperNum and " +
-                "t3.PONum = t4.PaperNum and t4.Finished = 1 " +
-                "group by t1.PaperNum, t3.PONum, t1.BuildDate, t2.POTypeName, t1.LotNotes, t1.PartNum, t1.Revision, " +
-                "t1.TotalPcs order by t1.PaperNum";
+                "t3.PONum = t4.PaperNum and t4.Finished = 1 group by t1.PartNum, t1.Revision " +
+                "order by t1.PartNum";
             using (SqlConnection sqlcon = new SqlConnection(strCon))
             {
                 using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))

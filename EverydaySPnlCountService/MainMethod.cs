@@ -1109,11 +1109,16 @@ namespace EverydaySPnlCountService
         /// </summary>
         private void ChkTracePartNum()
         {
+            /*
+             * 2017/01/08 CoreyChen Modify
+             * 總經理指示，將需注意的特殊料號事項合併，不要依個別製令單號顯示！
+             * 因為若依製令單號顯示，重覆料號太多，故修正成依料號顯示並將製令單總PCS數加總。
+             */
             var Result = new DataTable();
-            Result.Columns.Add("製令單號");
-            Result.Columns.Add("作業時間");
-            Result.Columns.Add("訂單種類");
-            Result.Columns.Add("批量種類");
+            //Result.Columns.Add("製令單號");
+            //Result.Columns.Add("作業時間");
+            //Result.Columns.Add("訂單種類");
+            //Result.Columns.Add("批量種類");
             Result.Columns.Add("料號");
             Result.Columns.Add("版序");
             Result.Columns.Add("製令總PCS數");
@@ -1126,10 +1131,10 @@ namespace EverydaySPnlCountService
                 if (SpecialData.Rows.Count > 0)
                 {
                     DataRow NewRow = Result.NewRow();
-                    NewRow["製令單號"] = row["製令單號"].ToString();
-                    NewRow["作業時間"] = row["作業時間"].ToString();
-                    NewRow["訂單種類"] = row["訂單種類"].ToString();
-                    NewRow["批量種類"] = row["批量種類"].ToString();
+                    //NewRow["製令單號"] = row["製令單號"].ToString();
+                    //NewRow["作業時間"] = row["作業時間"].ToString();
+                    //NewRow["訂單種類"] = row["訂單種類"].ToString();
+                    //NewRow["批量種類"] = row["批量種類"].ToString();
                     NewRow["料號"] = row["料號"].ToString();
                     NewRow["版序"] = row["版序"].ToString();
                     NewRow["製令總PCS數"] = row["製令總PCS數"].ToString();
@@ -1143,11 +1148,11 @@ namespace EverydaySPnlCountService
             }
             SaveFile = Path.GetTempPath() + @"\SpecialPartNum.xls";
             var srcTable = new DataTable[] { Result };
-            var srcSheetName = new string[] { "製令單特殊注意事項" };
+            var srcSheetName = new string[] { "製令單特殊料號注意事項" };
             DataTableToExcel(srcTable, srcSheetName, SaveFile);
-            SendMail("sm4@ewpcb.com.tw", "製令單特殊注意事項通知", "chkfmedissuenote@ewpcb.com.tw", 
-                DateTime.Now.ToString("yyyy-MM-dd_HHmm") + " 製令單特殊注意事項通知！",
-                "製令單特殊注意事項通知，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+            SendMail("sm4@ewpcb.com.tw", "製令單特殊料號注意事項通知", "chkfmedissuenote@ewpcb.com.tw", 
+                DateTime.Now.ToString("yyyy-MM-dd_HHmm") + " 製令單特殊料號注意事項通知！",
+                "製令單特殊料號注意事項通知，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
         }
 
         /// <summary>
