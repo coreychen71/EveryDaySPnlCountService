@@ -434,5 +434,33 @@ namespace EverydaySPnlCountService
             }
             return result;
         }
+
+        /// <summary>
+        /// 取得工程部承認書製作清單料號，傑偲製程現帳是否已扺達650測試站。
+        /// </summary>
+        /// <returns></returns>
+        public DataTable ChkAcknowledgmentIn650()
+        {
+            var Result = new DataTable();
+            var strProcedure = "GetAcknowledgmentIn650";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                using (SqlCommand sqlcomm = new SqlCommand(strProcedure, sqlcon))
+                {
+                    sqlcomm.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        sqlcon.Open();
+                        SqlDataReader reader = sqlcomm.ExecuteReader();
+                        Result.Load(reader);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainMethod.InsertLog("ChkAcknowledgmentIn650()-" + ex.Message);
+                    }
+                }
+            }
+            return Result;
+        }
     }
 }

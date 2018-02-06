@@ -28,7 +28,6 @@ namespace EverydaySPnlCountService
 
         public MainMethod()
         {
-            timer = new Timer();
             timer.Interval = timerInterval;
             timer.AutoReset = true;
             timer.Elapsed += Timer_Elapsed;
@@ -49,6 +48,7 @@ namespace EverydaySPnlCountService
             //ChkFMEdIssueNote();
             //ChkTracePartNum();
             //ChkDrill2ndProcByMonth();
+            //CheckAcknowledgmentIn650();
         }
 
         #region Timer Block
@@ -180,6 +180,7 @@ namespace EverydaySPnlCountService
         {
             timer2.Stop();
             ChkVCUT_Jump();
+            CheckAcknowledgmentIn650();
             //2017/09/19 停用，主管反應信件過多
             //ChkFMEdIssueNote();
             timer2.Start();
@@ -1205,6 +1206,43 @@ namespace EverydaySPnlCountService
             catch (Exception ex)
             {
                 InsertLog("ChkDrill2ndProcByMonth()-" + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 檢查工程承認書製作清單料號，在傑偲製程現帳是否已進到650測試站，
+        /// 若已進入測試站，尚未結案的承認書單據需寄出MAIL通知相關人員。
+        /// </summary>
+        private void CheckAcknowledgmentIn650()
+        {
+            ConnEWNAS ewnas = new ConnEWNAS();
+            var SrcTB = ewnas.ChkAcknowledgmentIn650();
+            if (SrcTB.Rows.Count > 0)
+            {
+                var Result = string.Empty;
+                foreach (DataRow row in SrcTB.Rows)
+                {
+                    Result += string.Format("<br/>{0}<br/>{1}<br/>{2}<br/>{3}<br/>{4}<br/>{5}<br/>{6}<br/>{7}<br/>" +
+                        "======================================</br>",
+                        "單據號碼：" + row["單據號碼"].ToString(),
+                        "料號：" + row["料號"].ToString(),
+                        "建立時間：" + row["建立時間"].ToString(),
+                        "建立人員：" + row["建立人員"].ToString(),
+                        "出貨報告完成時間：" + row["出貨報告完成時間"].ToString(),
+                        "出貨報告完成人員：" + row["出貨報告完成人員"].ToString(),
+                        "承認書完成時間：" + row["承認書完成時間"].ToString(),
+                        "承認書完成人員：" + row["承認書完成人員"].ToString());
+                }
+                try
+                {
+                    SendMail("sm4@ewpcb.com.tw", "工程部承認書製作料號進測試站通知", "acknowledgment@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " 工程部承認書製作料號進測試站通知！",
+                    Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                }
+                catch (Exception ex)
+                {
+                    InsertLog("CheckAcknowledgmentIn650()-" + ex.Message);
+                }
             }
         }
 
