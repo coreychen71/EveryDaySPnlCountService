@@ -1232,6 +1232,7 @@ namespace EverydaySPnlCountService
                         "出貨報告完成人員：" + row["出貨報告完成人員"].ToString(),
                         "承認書完成時間：" + row["承認書完成時間"].ToString(),
                         "承認書完成人員：" + row["承認書完成人員"].ToString());
+                    ewnas.UpdateAcknowledgmentSendMail(row["單據號碼"].ToString());
                 }
                 try
                 {

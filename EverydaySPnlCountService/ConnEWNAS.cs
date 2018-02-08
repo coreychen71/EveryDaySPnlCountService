@@ -462,5 +462,32 @@ namespace EverydaySPnlCountService
             }
             return Result;
         }
+
+        /// <summary>
+        /// 修改承認書表單Mail寄出欄位值為1，以表示該筆承認書製作單據已寄送過Mail
+        /// </summary>
+        /// <param name="PaperNum">單據號碼</param>
+        /// <returns></returns>
+        public int UpdateAcknowledgmentSendMail(string PaperNum)
+        {
+            var Result = 0;
+            var strComm = "update Acknowledgment set SendMail = 1 where PaperNum = '" + PaperNum + "'";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))
+                {
+                    try
+                    {
+                        sqlcon.Open();
+                        Result = sqlcomm.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        MainMethod.InsertLog("UpdateAcknowledgmentSendMail()-" + ex.Message);
+                    }
+                }
+            }
+            return Result;
+        }
     }
 }
