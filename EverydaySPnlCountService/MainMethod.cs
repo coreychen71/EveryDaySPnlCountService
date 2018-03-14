@@ -1239,8 +1239,8 @@ namespace EverydaySPnlCountService
                 }
                 try
                 {
-                    SendMail("sm4@ewpcb.com.tw", "工程部承認書製作料號進測試站通知", "acknowledgment@ewpcb.com.tw",
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " 工程部承認書製作料號進測試站通知！",
+                    SendMail("sm4@ewpcb.com.tw", "承認書製作通知", "acknowledgment@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " 料號承認書請開始製作，料號已進測試站通知！",
                     Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
                 }
                 catch (Exception ex)
@@ -1282,15 +1282,18 @@ namespace EverydaySPnlCountService
                         ewnas.UpdateAcknowledgmentSendMail(row["單據號碼"].ToString());
                     }
                 }
-                try
+                if (!string.IsNullOrWhiteSpace(Result))
                 {
-                    SendMail("sm4@ewpcb.com.tw", "工程部承認書製作料號進測試站通知", "acknowledgment@ewpcb.com.tw",
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " 工程部承認書製作料號進測試站通知！",
-                    Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
-                }
-                catch (Exception ex)
-                {
-                    InsertLog("CheckAcknowledgmentIn650()-" + ex.Message);
+                    try
+                    {
+                        SendMail("sm4@ewpcb.com.tw", "承認書製作通知", "acknowledgment@ewpcb.com.tw",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " 料號承認書請開始製作，指定完成日即將到期！",
+                        Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                    }
+                    catch (Exception ex)
+                    {
+                        InsertLog("CheckAcknowledgmentAppointDate()-" + ex.Message);
+                    }
                 }
             }
         }
