@@ -49,6 +49,7 @@ namespace EverydaySPnlCountService
             //ChkTracePartNum();
             //ChkDrill2ndProcByMonth();
             //CheckAcknowledgmentIn650();
+            //CheckAcknowledgmentAppointDate();
         }
 
         #region Timer Block
@@ -181,6 +182,7 @@ namespace EverydaySPnlCountService
             timer2.Stop();
             ChkVCUT_Jump();
             CheckAcknowledgmentIn650();
+            CheckAcknowledgmentAppointDate();
             //2017/09/19 停用，主管反應信件過多
             //ChkFMEdIssueNote();
             timer2.Start();
@@ -1210,8 +1212,9 @@ namespace EverydaySPnlCountService
         }
 
         /// <summary>
-        /// 檢查工程承認書製作清單料號，在傑偲製程現帳是否已進到650測試站，
-        /// 若已進入測試站，尚未結案的承認書單據需寄出MAIL通知相關人員。
+        /// 檢查工程承認書製作料號清單
+        /// 若未押指定完成日期，則在傑偲製程現帳檢查相關工單中，只要任一張工單已進到650測試站，
+        /// 尚未結案且未發過通知信的的承認書單據需寄出MAIL通知相關人員。
         /// </summary>
         private void CheckAcknowledgmentIn650()
         {
@@ -1233,6 +1236,51 @@ namespace EverydaySPnlCountService
                         "承認書完成時間：" + row["承認書完成時間"].ToString(),
                         "承認書完成人員：" + row["承認書完成人員"].ToString());
                     ewnas.UpdateAcknowledgmentSendMail(row["單據號碼"].ToString());
+                }
+                try
+                {
+                    SendMail("sm4@ewpcb.com.tw", "工程部承認書製作料號進測試站通知", "acknowledgment@ewpcb.com.tw",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " 工程部承認書製作料號進測試站通知！",
+                    Result + "<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", null);
+                }
+                catch (Exception ex)
+                {
+                    InsertLog("CheckAcknowledgmentIn650()-" + ex.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 檢查工程承認書製作料號清單
+        /// 若有押指定完成日期，則要在完成日的前3天就通知
+        /// 尚未結案且未發過通知信的的承認書單據需寄出MAIL通知相關人員。
+        /// </summary>
+        private void CheckAcknowledgmentAppointDate()
+        {
+            ConnEWNAS ewnas = new ConnEWNAS();
+            var SrcTB = ewnas.ChkAcknowledgmentAppointDate();
+            if (SrcTB.Rows.Count > 0)
+            {
+                var Result = string.Empty;
+                foreach (DataRow row in SrcTB.Rows)
+                {
+                    var AppointDate = Convert.ToDateTime(row["指定完成日期"]);
+                    var DifferenceDay = AppointDate - DateTime.Now.Date;
+                    if (DifferenceDay.TotalDays <= 3)
+                    {
+                        Result += string.Format("<br/>{0}<br/>{1}<br/>{2}<br/>{3}<br/>{4}<br/>{5}<br/>{6}<br/>{7}<br/>" +
+                            "{8}<br/>======================================<br/>",
+                            "單據號碼：" + row["單據號碼"].ToString(),
+                            "料號：" + row["料號"].ToString(),
+                            "建立時間：" + row["建立時間"].ToString(),
+                            "建立人員：" + row["建立人員"].ToString(),
+                            "指定完成日期：" + row["指定完成日期"].ToString(),
+                            "出貨報告完成時間：" + row["出貨報告完成時間"].ToString(),
+                            "出貨報告完成人員：" + row["出貨報告完成人員"].ToString(),
+                            "承認書完成時間：" + row["承認書完成時間"].ToString(),
+                            "承認書完成人員：" + row["承認書完成人員"].ToString());
+                        ewnas.UpdateAcknowledgmentSendMail(row["單據號碼"].ToString());
+                    }
                 }
                 try
                 {

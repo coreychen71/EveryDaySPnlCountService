@@ -464,6 +464,34 @@ namespace EverydaySPnlCountService
         }
 
         /// <summary>
+        /// 取得工程部承認書有押指定完成日期的製作料號清單
+        /// </summary>
+        /// <returns></returns>
+        public DataTable ChkAcknowledgmentAppointDate()
+        {
+            var Result = new DataTable();
+            var strProcedure = "GetAcknowledgmentAppointDate";
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                using (SqlCommand sqlcomm = new SqlCommand(strProcedure, sqlcon))
+                {
+                    sqlcomm.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        sqlcon.Open();
+                        SqlDataReader reader = sqlcomm.ExecuteReader();
+                        Result.Load(reader);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainMethod.InsertLog("ChkAcknowledgmentIn650()-" + ex.Message);
+                    }
+                }
+            }
+            return Result;
+        }
+
+        /// <summary>
         /// 修改承認書表單Mail寄出欄位值為1，以表示該筆承認書製作單據已寄送過Mail
         /// </summary>
         /// <param name="PaperNum">單據號碼</param>
