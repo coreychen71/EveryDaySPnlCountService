@@ -341,5 +341,35 @@ namespace EverydaySPnlCountService
             }
             return Result;
         }
+
+        /// <summary>
+        /// 取得特休日即將到期的在職人員名單，若特休到期日在日期區間內即帶出資料
+        /// 日期區間為當天日期加60天~當天日期加100天
+        /// </summary>
+        /// <returns></returns>
+        public DataTable HPSdGetSpecialBreakDay()
+        {
+            var Result = new DataTable();
+            var strComm = string.Empty;
+            using (SqlConnection sqlcon = new SqlConnection(strCon))
+            {
+                using (SqlCommand sqlcomm = new SqlCommand(strComm, sqlcon))
+                {
+                    sqlcomm.CommandText = "HPSdGetSpecialBreakDay";
+                    sqlcomm.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        sqlcon.Open();
+                        SqlDataReader Reader = sqlcomm.ExecuteReader();
+                        Result.Load(Reader);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainMethod.InsertLog("HPSdGetSpecialBreakDay()-" + ex.Message);
+                    }
+                }
+            }
+            return Result;
+        }
     }
 }

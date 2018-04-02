@@ -50,6 +50,7 @@ namespace EverydaySPnlCountService
             //ChkDrill2ndProcByMonth();
             //CheckAcknowledgmentIn650();
             //CheckAcknowledgmentAppointDate();
+            //HPSdGetSpecialBreakDay();
         }
 
         #region Timer Block
@@ -142,10 +143,14 @@ namespace EverydaySPnlCountService
                 ChkTracePartNum();
                 Start();
             }
-            //每日00:10進行每日製令稽核現帳預報廢清單(Excel)
+            //每日00:10進行每日製令稽核現帳預報廢清單(Excel)、特休假即將到期人員查詢(Exce)-每月1號才檢查
             else if (CheckTime("00:10:00", "00:10:59"))
             {
                 Stop();
+                if (DateTime.Now.Day == 1)
+                {
+                    HPSdGetSpecialBreakDay();
+                }
                 ChkIssueAndScrapWIP();
                 Start();
             }
@@ -1294,6 +1299,33 @@ namespace EverydaySPnlCountService
                     {
                         InsertLog("CheckAcknowledgmentAppointDate()-" + ex.Message);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 取得特休假即將到期的在職人員清冊
+        /// </summary>
+        private void HPSdGetSpecialBreakDay()
+        {
+            ConnERP erp = new ConnERP();
+            var SrcData = erp.HPSdGetSpecialBreakDay();
+            if (SrcData.Rows.Count > 0)
+            {
+                try
+                {
+                    var TB = new DataTable[] { SrcData };
+                    var Sheet = new string[] { "特休日即將到期人員清單" };
+                    SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd_HHmm") + "特休假到期人員清單.xls";
+                    DataTableToExcel(TB, Sheet, SaveFile);
+                    SendMail("sm4@ewpcb.com.tw", "特休假到期通知", "specialbreakday@ewpcb.com.tw",
+                        DateTime.Now.ToString("yyyy-MM-dd_HH:mm") + " 特休假即將到期人員清單！",
+                        "特休假即將到期人員清單，請詳閱附件。<br/><br/>-----此封郵件由系統所寄出，請勿直接回覆！-----", SaveFile);
+                    SrcData.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    InsertLog("HPSdGetSpecialBreakDay()-" + ex.Message);
                 }
             }
         }
