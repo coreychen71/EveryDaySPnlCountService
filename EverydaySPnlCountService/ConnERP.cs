@@ -12,7 +12,7 @@ namespace EverydaySPnlCountService
         /// <summary>
         /// SQL Connection String
         /// </summary>
-        private string strCon = "server=ERP;database=EW;uid=jsis;pwd=JSIS";
+        private string strCon = "server=192.168.1.39;database=EW;uid=jsis;pwd=JSIS";
 
         private string pDate = string.Empty;
 

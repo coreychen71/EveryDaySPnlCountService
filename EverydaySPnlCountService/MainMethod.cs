@@ -1316,7 +1316,7 @@ namespace EverydaySPnlCountService
                 {
                     var TB = new DataTable[] { SrcData };
                     var Sheet = new string[] { "特休日即將到期人員清單" };
-                    SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd_HHmm") + "特休假到期人員清單.xls";
+                    SaveFile = Path.GetTempPath() + DateTime.Now.ToString("yyyy-MM-dd") + "特休到期清單.xls";
                     DataTableToExcel(TB, Sheet, SaveFile);
                     SendMail("sm4@ewpcb.com.tw", "特休假到期通知", "specialbreakday@ewpcb.com.tw",
                         DateTime.Now.ToString("yyyy-MM-dd_HH:mm") + " 特休假即將到期人員清單！",
@@ -1340,6 +1340,7 @@ namespace EverydaySPnlCountService
         /// <param name="ExcelRevi">要存檔的Excel版本，2007以上為true</param>
         private bool DataTableToExcel(DataTable[] Source, string[] SheetName, string SavePath)
         {
+            var cc = DateTime.Now.ToString();
             bool result = false;
             IWorkbook workbook;
             ISheet Sheet;
